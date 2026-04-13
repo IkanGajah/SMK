@@ -1,19 +1,75 @@
 package com.kos.backend_api.models;
 
-public class Penyewa extends User {
-    private String noKtp;
-    private Kamar kamarDisewa;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
-    public Penyewa(String idUser, String username, String password, String nama, String noTelepon, String noKtp) {
-        super(idUser, username, password, nama, noTelepon);
-        this.noKtp = noKtp;
+@Entity
+@Table(name = "penyewa")
+public class Penyewa {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    private String namaLengkap;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    private String password;
+    private String noHp;
+
+    public Penyewa() {
     }
 
-    public void setKamarDisewa(Kamar kamar) {
-        this.kamarDisewa = kamar;
+    public Penyewa(String namaLengkap, String email, String password, String noHp) {
+        this.namaLengkap = namaLengkap;
+        this.email = email;
+        this.password = password;
+        this.noHp = noHp;
     }
 
-    public void bayarTagihan(TransaksiSewa transaksi) {
-        transaksi.prosesPembayaran();
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getNamaLengkap() {
+        return namaLengkap;
+    }
+
+    public void setNamaLengkap(String namaLengkap) {
+        this.namaLengkap = namaLengkap;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getNoHp() {
+        return noHp;
+    }
+
+    public void setNoHp(String noHp) {
+        this.noHp = noHp;
     }
 }

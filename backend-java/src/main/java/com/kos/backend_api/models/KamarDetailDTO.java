@@ -1,0 +1,57 @@
+package com.kos.backend_api.models; 
+
+public class KamarDetailDTO {
+    private int id;
+    private String nomorKamar;
+    private String fasilitas;
+    private Integer harga;
+    private String status;
+    
+    private String namaPenyewa; 
+    private String tempoBayar;
+
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
+    }
+    public String getNomorKamar() {
+        return nomorKamar;
+    }
+    public void setNomorKamar(String nomorKamar) {
+        this.nomorKamar = nomorKamar;
+    }
+    public String getFasilitas() {
+        return fasilitas;
+    }
+    public void setFasilitas(String fasilitas) {
+        this.fasilitas = fasilitas;
+    }
+    public Integer getHarga() {
+        return harga;
+    }
+    public void setHarga(Integer harga) {
+        this.harga = harga;
+    }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    public String getNamaPenyewa() {
+        return namaPenyewa;
+    }
+    public void setNamaPenyewa(String namaPenyewa) {
+        this.namaPenyewa = namaPenyewa;
+    }
+    public String getTempoBayar() {
+        return tempoBayar;
+    }
+    public void setTempoBayar(String tempoBayar) {
+        this.tempoBayar = tempoBayar;
+    }  
+
+    
+}
