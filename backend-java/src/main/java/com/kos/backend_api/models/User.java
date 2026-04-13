@@ -3,7 +3,7 @@ package com.kos.backend_api.models;
 public class User {
     protected String idUser;
     protected String username;
-    private String password; // Encapsulated
+    private String password; //blom dipakai, tapi disimpen dulu
     protected String nama;
     protected String noTelepon;
     protected boolean isLoggedIn;
