@@ -3,13 +3,13 @@ import React from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export default function TabLayout() {
+export default function OwnerTabLayout() {
   const colorScheme = useColorScheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#3525cd',
+        tabBarActiveTintColor: '#4f46e5',
         tabBarInactiveTintColor: '#94a3b8',
         headerShown: false,
         tabBarStyle: {
@@ -27,34 +27,37 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontFamily: 'Inter',
           fontSize: 11,
-          fontWeight: '500',
+          fontWeight: '600',
+          textTransform: 'uppercase',
+          marginTop: 4,
         }
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Catalog',
-          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="grid-view" color={color} />,
+          title: 'Overview',
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="dashboard" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="rent"
+        name="branches"
         options={{
-          title: 'My Rent',
-          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="payments" color={color} />,
+          title: 'Branches',
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="location-city" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="reports"
+        options={{
+          title: 'Reports',
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="assessment" color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="account-circle" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          href: null,
+          tabBarIcon: ({ color }) => <MaterialIcons size={24} name="person" color={color} />,
         }}
       />
     </Tabs>
