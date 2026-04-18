@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { Kamar } from '@/types/types';
+import { API_BASE_URL } from '@/constants/config';
 
 const { width } = Dimensions.get('window');
 
@@ -29,8 +30,7 @@ export default function DetailKamarScreen() {
     harga: 1200000,
   };
 
-  // Ganti IP jangan lupa le
-  const API_URL = `http://192.168.1.10:8080/api/kamar/${id}`; 
+  const API_URL = `${API_BASE_URL}/kamar/${id}`; 
 
   useEffect(() => {
     fetchDetailKamar();

@@ -4,6 +4,7 @@ import { Text, View, FlatList, ActivityIndicator, StatusBar, TouchableOpacity, T
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { API_BASE_URL } from '@/constants/config';
 
 // Mock images for the beautiful UI representation
 const MOCK_IMAGES = [
@@ -24,8 +25,7 @@ export default function HomeScreen() {
   const [kamar, setKamar] = useState<Kamar[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Ganti berdasarkan IP laptop saat ini
-  const API_URL = 'http://192.168.1.10:8080/api/kamar'; 
+  const API_URL = `${API_BASE_URL}/kamar`; 
 
   useEffect(() => {
     fetchKamar();

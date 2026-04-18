@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { API_BASE_URL } from '@/constants/config';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -32,38 +33,28 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
-      // ---------------------------------------------------------
-      // ⚠️ [PENANDA BACKEND] Panggil API Login di sini ⚠️
-      // ---------------------------------------------------------
-      // Contoh request ke backend:
-      /*
-      const response = await fetch('http://10.1.13.53:8080/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await response.json();
       
-      if (response.ok) {
-        // Simpan token (misal pakai expo-secure-store atau AsyncStorage)
-        // Arahkan ke dashboard admin/pemilik
-        router.replace('/dashboard');
+      const responseData = await response.json();
+      
+      if (response.ok && responseData.data) {
+        const role = responseData.data.role;
+        // Simpan token di sini jika perlu: responseData.data.token
+        
+        if (role === 'ROLE_OWNER') {
+          router.replace('/(owner)' as any);
+        } else if (role === 'ROLE_ADMIN') {
+          router.replace('/(admin)' as any);
+        } else {
+          router.replace('/(tabs)' as any);
+        }
       } else {
-        Alert.alert("Login Gagal", data.message || "Kredensial tidak valid");
+        Alert.alert("Login Gagal", responseData.message || "Kredensial tidak valid");
       }
-      */
-
-      // Simulasi delay request (Hapus ini saat sudah connect backend)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      Alert.alert(
-        "Simulasi Login", 
-        "Pilih peran (role) untuk masuk:",
-        [
-          { text: "Tenant", onPress: () => router.replace('/(tabs)' as any) },
-          { text: "Admin", onPress: () => router.replace('/(admin)' as any) },
-          { text: "Owner", onPress: () => router.replace('/(owner)' as any) }
-        ]
-      );
       
     } catch (error) {
       console.error(error);

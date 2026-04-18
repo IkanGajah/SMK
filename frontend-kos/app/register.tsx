@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { API_BASE_URL } from '@/constants/config';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -47,16 +48,12 @@ export default function RegisterScreen() {
     setIsLoading(true);
 
     try {
-      // ---------------------------------------------------------
-      // ⚠️ [PENANDA BACKEND] Panggil API Register di sini ⚠️
-      // ---------------------------------------------------------
-      // Contoh request ke backend:
-      /*
-      const response = await fetch('http://10.1.13.53:8080/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nama, email, noTelepon, password, noKtp })
       });
+      
       const data = await response.json();
       
       if (response.ok) {
@@ -65,15 +62,6 @@ export default function RegisterScreen() {
       } else {
         Alert.alert("Registrasi Gagal", data.message || "Gagal membuat akun");
       }
-      */
-
-      // Simulasi delay request (Hapus ini saat sudah connect backend)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      Alert.alert(
-        "Simulasi", 
-        "Request Registrasi dikirim!\n\nNama: " + nama + "\nEmail: " + email + "\n(Cek penanda di kode)",
-        [{ text: "OK", onPress: () => router.push('/login' as any) }]
-      );
       
     } catch (error) {
       console.error(error);
