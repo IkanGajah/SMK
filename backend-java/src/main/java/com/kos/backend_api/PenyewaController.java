@@ -19,14 +19,12 @@ public class PenyewaController {
     @Autowired
     private PenyewaRepository penyewaRepository;
 
-    // Ambil semua daftar penyewa
     @GetMapping
     public WebResponse<List<Penyewa>> getAll() {
         List<Penyewa> data = penyewaRepository.findAll();
         return new WebResponse<>(200, "Daftar penyewa berhasil diambil", data);
     }
 
-    // Daftarkan penyewa baru
     @PostMapping
     public WebResponse<Penyewa> create(@RequestBody Penyewa request) {
         Penyewa baru = penyewaRepository.save(request);

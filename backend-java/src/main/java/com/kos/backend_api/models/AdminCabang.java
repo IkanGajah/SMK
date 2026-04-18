@@ -1,15 +1,25 @@
-// package com.kos.backend_api.models;
+package com.kos.backend_api.models;
 
-// public class AdminCabang extends User {
-//     private CabangKos cabang;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
-//     public AdminCabang(String idUser, String username, String password, String nama, String noTelepon, CabangKos cabang) {
-//         super(idUser, username, password, nama, noTelepon);
-//         this.cabang = cabang;
-//     }
+@Entity
+@Table(name = "admin_cabang")
+public class AdminCabang extends User {
 
-//     // public void catatPengeluaran(Pengeluaran pengeluaran) {
-//     //     cabang.tambahPengeluaran(pengeluaran);
-//     //     System.out.println("Admin " + this.nama + " mencatat pengeluaran: " + pengeluaran.getKategori() + " - Rp" + pengeluaran.getNominal());
-//     // }
-// }
+    @ManyToOne
+    @JoinColumn(name = "id_cabang")
+    private CabangKos cabang;
+
+    public AdminCabang() {}
+
+    public AdminCabang(String username, String password, String nama, String noTelepon, String email, CabangKos cabang) {
+        super(username, password, nama, noTelepon, email);
+        this.cabang = cabang;
+    }
+
+    public CabangKos getCabang() { return cabang; }
+    public void setCabang(CabangKos cabang) { this.cabang = cabang; }
+}

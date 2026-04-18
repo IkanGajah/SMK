@@ -1,45 +1,38 @@
-// package com.kos.backend_api.models;
-// import java.util.ArrayList;
-// import java.util.List;
+package com.kos.backend_api.models;
 
-// public class CabangKos {
-//     private String idCabang;
-//     private String namaCabang;
-//     private String alamat;
-//     private List<Kamar> daftarKamar;
-//     // private List<Pengeluaran> daftarPengeluaran;
-//     private List<TransaksiSewa> daftarTransaksi;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
-//     public CabangKos(String idCabang, String namaCabang, String alamat) {
-//         this.idCabang = idCabang;
-//         this.namaCabang = namaCabang;
-//         this.alamat = alamat;
-//         this.daftarKamar = new ArrayList<>();
-//         // this.daftarPengeluaran = new ArrayList<>();
-//         this.daftarTransaksi = new ArrayList<>();
-//     }
+@Entity
+@Table(name = "cabang_kos")
+public class CabangKos {
 
-//     public void tambahKamar(Kamar kamar) { this.daftarKamar.add(kamar); }
-//     // public void tambahPengeluaran(Pengeluaran p) { this.daftarPengeluaran.add(p); }
-//     public void tambahTransaksi(TransaksiSewa t) { this.daftarTransaksi.add(t); }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idCabang;
 
-//     public String getNamaCabang() { return this.namaCabang; }
+    private String namaCabang;
+    private String alamat;
+    private int jumlahKamar;
 
-//     public double totalPemasukan() {
-//         double total = 0;
-//         for (TransaksiSewa t : daftarTransaksi) {
-//             if (t.getStatusPembayaran() == StatusBayar.LUNAS) {
-//                 total += t.getNominal();
-//             }
-//         }
-//         return total;
-//     }
+    public CabangKos() {}
 
-//     // public double totalPengeluaran() {
-//     //     double total = 0;
-//     //     for (Pengeluaran p : daftarPengeluaran) {
-//     //         total += p.getNominal();
-//     //     }
-//     //     return total;
-//     // }
-// }
+    public CabangKos(String namaCabang, String alamat, int jumlahKamar) {
+        this.namaCabang = namaCabang;
+        this.alamat = alamat;
+        this.jumlahKamar = jumlahKamar;
+    }
+
+    public int getIdCabang() { return idCabang; }
+    public void setIdCabang(int idCabang) { this.idCabang = idCabang; }
+
+    public String getNamaCabang() { return namaCabang; }
+    public void setNamaCabang(String namaCabang) { this.namaCabang = namaCabang; }
+
+    public String getAlamat() { return alamat; }
+    public void setAlamat(String alamat) { this.alamat = alamat; }
+
+    public int getJumlahKamar() { return jumlahKamar; }
+    public void setJumlahKamar(int jumlahKamar) { this.jumlahKamar = jumlahKamar; }
+}

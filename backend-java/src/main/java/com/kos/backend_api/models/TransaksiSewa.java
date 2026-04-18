@@ -1,14 +1,9 @@
 package com.kos.backend_api.models;
 
+import com.kos.backend_api.models.enums.MetodePembayaran;
+import com.kos.backend_api.models.enums.StatusBayar;
+import jakarta.persistence.*;
 import java.time.LocalDate;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "transaksi_sewa")
@@ -16,7 +11,7 @@ public class TransaksiSewa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private int idTransaksi;
 
     @ManyToOne
     @JoinColumn(name = "id_penyewa")
@@ -26,75 +21,44 @@ public class TransaksiSewa {
     @JoinColumn(name = "id_kamar")
     private Kamar kamar;
 
-    private LocalDate tanggalMulaiSewa;
-    private Integer durasiBulan; 
-    private int nominalSewa; 
-    private String statusPembayaran; 
+    private LocalDate tanggalTransaksi;
+    private int nominal;
+    
+    @Enumerated(EnumType.STRING)
+    private MetodePembayaran metodePembayaran;
+    
+    @Enumerated(EnumType.STRING)
+    private StatusBayar statusBayar; 
 
     public TransaksiSewa() {}
 
-    public TransaksiSewa(Penyewa penyewa, Kamar kamar, LocalDate tanggalMulaiSewa, int durasiBulan, int nominalSewa, String statusPembayaran) {
+    public TransaksiSewa(Penyewa penyewa, Kamar kamar, LocalDate tanggalTransaksi, int nominal, MetodePembayaran metodePembayaran, StatusBayar statusBayar) {
         this.penyewa = penyewa;
         this.kamar = kamar;
-        this.tanggalMulaiSewa = tanggalMulaiSewa;
-        this.durasiBulan = durasiBulan;
-        this.nominalSewa = nominalSewa;
-        this.statusPembayaran = statusPembayaran;
+        this.tanggalTransaksi = tanggalTransaksi;
+        this.nominal = nominal;
+        this.metodePembayaran = metodePembayaran;
+        this.statusBayar = statusBayar;
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getIdTransaksi() { return idTransaksi; }
+    public void setIdTransaksi(int idTransaksi) { this.idTransaksi = idTransaksi; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public Penyewa getPenyewa() { return penyewa; }
+    public void setPenyewa(Penyewa penyewa) { this.penyewa = penyewa; }
 
-    public Penyewa getPenyewa() {
-        return penyewa;
-    }
+    public Kamar getKamar() { return kamar; }
+    public void setKamar(Kamar kamar) { this.kamar = kamar; }
 
-    public void setPenyewa(Penyewa penyewa) {
-        this.penyewa = penyewa;
-    }
+    public LocalDate getTanggalTransaksi() { return tanggalTransaksi; }
+    public void setTanggalTransaksi(LocalDate tanggalTransaksi) { this.tanggalTransaksi = tanggalTransaksi; }
 
-    public Kamar getKamar() {
-        return kamar;
-    }
+    public int getNominal() { return nominal; }
+    public void setNominal(int nominal) { this.nominal = nominal; }
 
-    public void setKamar(Kamar kamar) {
-        this.kamar = kamar;
-    }
+    public MetodePembayaran getMetodePembayaran() { return metodePembayaran; }
+    public void setMetodePembayaran(MetodePembayaran metodePembayaran) { this.metodePembayaran = metodePembayaran; }
 
-    public LocalDate getTanggalMulaiSewa() {
-        return tanggalMulaiSewa;
-    }
-
-    public void setTanggalMulaiSewa(LocalDate tanggalMulaiSewa) {
-        this.tanggalMulaiSewa = tanggalMulaiSewa;
-    }
-
-    public Integer getDurasiBulan() {
-        return durasiBulan;
-    }
-
-    public void setDurasiBulan(Integer durasiBulan) {
-        this.durasiBulan = durasiBulan;
-    }
-
-    public int getNominalSewa() {
-        return nominalSewa;
-    }
-
-    public void setNominalSewa(int nominalSewa) {
-        this.nominalSewa = nominalSewa;
-    }
-
-    public String getStatusPembayaran() {
-        return statusPembayaran;
-    }
-
-    public void setStatusPembayaran(String statusPembayaran) {
-        this.statusPembayaran = statusPembayaran;
-    }
+    public StatusBayar getStatusBayar() { return statusBayar; }
+    public void setStatusBayar(StatusBayar statusBayar) { this.statusBayar = statusBayar; }
 }
