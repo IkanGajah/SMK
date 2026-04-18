@@ -14,7 +14,14 @@ import com.kos.backend_api.models.Kamar;
 import com.kos.backend_api.models.Penyewa;
 import com.kos.backend_api.models.TransaksiSewa;
 import com.kos.backend_api.models.WebResponse;
+import com.kos.backend_api.models.User;
+import com.kos.backend_api.models.Owner;
+import com.kos.backend_api.models.AdminCabang;
 import com.kos.backend_api.models.enums.StatusKamar;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 
 @RestController
 @RequestMapping("/api/transaksi")
@@ -29,10 +36,25 @@ public class TransaksiController {
     @Autowired
     private PenyewaRepository penyewaRepository;
 
+    private void validateAdminCabangAccess(Integer kamarCabangId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return;
+        
+        Object principal = auth.getPrincipal();
+        if (principal instanceof AdminCabang admin) {
+            if (admin.getCabang() == null || admin.getCabang().getIdCabang() != kamarCabangId) {
+                throw new AccessDeniedException("Akses Ditolak: Anda hanya berhak mengelola transaksi di cabang Anda sendiri.");
+            }
+        }
+    }
+
     @PostMapping("/check-in")
+    @PreAuthorize("isAuthenticated()")
     public WebResponse<TransaksiSewa> checkIn(@RequestBody TransaksiSewa request) {
         Kamar kamar = kamarRepository.findById(request.getKamar().getIdKamar())
                 .orElseThrow(() -> new RuntimeException("Kamar tidak ditemukan"));
+
+        validateAdminCabangAccess(kamar.getCabang().getIdCabang());
 
         if (!StatusKamar.TERSEDIA.equals(kamar.getStatusKetersediaan())) {
             throw new RuntimeException("Kamar sedang tidak tersedia!");
@@ -56,11 +78,13 @@ public class TransaksiController {
     }
 
     @PostMapping("/check-out/{idTransaksi}")
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     public WebResponse<String> checkOut(@PathVariable Integer idTransaksi) {
         TransaksiSewa transaksi = transaksiRepository.findById(idTransaksi)
                 .orElseThrow(() -> new RuntimeException("Data transaksi tidak ditemukan"));
 
         Kamar kamar = transaksi.getKamar();
+        validateAdminCabangAccess(kamar.getCabang().getIdCabang());
 
         if (StatusKamar.TERSEDIA.equals(kamar.getStatusKetersediaan())) {
             throw new RuntimeException("Kamar ini sudah berstatus Tersedia dan tidak sedang disewa.");
@@ -73,7 +97,22 @@ public class TransaksiController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public WebResponse<List<TransaksiSewa>> getAll() {
-        return new WebResponse<>(200, "Daftar transaksi berhasil diambil", transaksiRepository.findAll());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+        
+        List<TransaksiSewa> data;
+        if (user instanceof Owner) {
+            data = transaksiRepository.findAll();
+        } else if (user instanceof AdminCabang admin) {
+            data = transaksiRepository.findByKamarCabangIdCabang(admin.getCabang().getIdCabang());
+        } else if (user instanceof Penyewa penyewa) {
+            data = transaksiRepository.findByPenyewaIdUser(penyewa.getIdUser());
+        } else {
+            throw new AccessDeniedException("Akses ditolak");
+        }
+        
+        return new WebResponse<>(200, "Daftar transaksi berhasil diambil", data);
     }
 }
