@@ -33,7 +33,7 @@ public class AuthController {
     @PostMapping("/login")
     public WebResponse<AuthResponse> authenticateUser(@RequestBody AuthRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User userDetails = (User) authentication.getPrincipal();
@@ -53,7 +53,6 @@ public class AuthController {
         // Untuk penyederhanaan saat ini, langsung hash password dan save.
         
         Penyewa penyewa = new Penyewa(
-                signUpRequest.getUsername(),
                 encoder.encode(signUpRequest.getPassword()),
                 signUpRequest.getNama(),
                 signUpRequest.getNoTelepon(),

@@ -1,8 +1,6 @@
 package com.kos.backend_api.models;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "cabang_kos")

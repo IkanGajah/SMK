@@ -15,8 +15,8 @@ public class AdminCabang extends User {
 
     public AdminCabang() {}
 
-    public AdminCabang(String username, String password, String nama, String noTelepon, String email, CabangKos cabang) {
-        super(username, password, nama, noTelepon, email);
+    public AdminCabang(String password, String nama, String noTelepon, String email, CabangKos cabang) {
+        super(password, nama, noTelepon, email);
         this.cabang = cabang;
     }
 

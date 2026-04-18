@@ -1,5 +1,6 @@
 package com.kos.backend_api.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kos.backend_api.models.enums.FasilitasKamar;
 import com.kos.backend_api.models.enums.StatusKamar;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ public class Kamar {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")
     private int idKamar;
 
     @ManyToOne
@@ -21,9 +23,11 @@ public class Kamar {
     @Enumerated(EnumType.STRING)
     private FasilitasKamar fasilitas;
     
+    @JsonProperty("harga")
     private int hargaSewa;
     
     @Enumerated(EnumType.STRING)
+    @JsonProperty("status")
     private StatusKamar statusKetersediaan; 
 
     public Kamar() {}

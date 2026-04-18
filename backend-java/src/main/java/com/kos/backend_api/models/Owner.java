@@ -9,7 +9,7 @@ public class Owner extends User {
 
     public Owner() {}
 
-    public Owner(String username, String password, String nama, String noTelepon, String email) {
-        super(username, password, nama, noTelepon, email);
+    public Owner(String password, String nama, String noTelepon, String email) {
+        super(password, nama, noTelepon, email);
     }
 }

@@ -11,8 +11,8 @@ public class Penyewa extends User {
 
     public Penyewa() {}
 
-    public Penyewa(String username, String password, String nama, String noTelepon, String email, String noKtp) {
-        super(username, password, nama, noTelepon, email);
+    public Penyewa(String password, String nama, String noTelepon, String email, String noKtp) {
+        super(password, nama, noTelepon, email);
         this.noKtp = noKtp;
     }
 

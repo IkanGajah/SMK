@@ -1,7 +1,5 @@
 package com.kos.backend_api;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +15,6 @@ import com.kos.backend_api.models.Kamar;
 import com.kos.backend_api.models.KamarDetailDTO;
 import com.kos.backend_api.models.WebResponse;
 import com.kos.backend_api.models.enums.StatusKamar;
-import com.kos.backend_api.models.enums.FasilitasKamar;
 
 @RestController
 @RequestMapping("/api/kamar")
@@ -28,9 +25,6 @@ public class KamarController {
 
     @Autowired
     private TransaksiSewaRepository transaksiSewaRepository;
-
-    @Autowired
-    private RiwayatSewaRepository riwayatSewaRepository;
 
     @GetMapping
     public WebResponse<List<Kamar>> getAll() {

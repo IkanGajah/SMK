@@ -15,15 +15,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            // Coba cari berdasarkan email jika username tidak ditemukan
-            user = userRepository.findByEmail(username);
-            if (user == null) {
-                throw new UsernameNotFoundException("User Not Found with username/email: " + username);
-            }
-        }
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+        // "usernameOrEmail" di sini sekarang pastinya adalah email, sesuai AuthController
+        User user = userRepository.findByEmail(usernameOrEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User tidak ditemukan dengan email: " + usernameOrEmail));
+
         return user;
     }
 }

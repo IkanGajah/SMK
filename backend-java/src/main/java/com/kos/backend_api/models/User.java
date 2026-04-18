@@ -18,8 +18,7 @@ public abstract class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected int idUser;
 
-    protected String username;
-    
+
     @JsonIgnore
     protected String password;
     
@@ -31,8 +30,7 @@ public abstract class User implements UserDetails {
 
     public User() {}
 
-    public User(String username, String password, String nama, String noTelepon, String email) {
-        this.username = username;
+    public User(String password, String nama, String noTelepon, String email) {
         this.password = password;
         this.nama = nama;
         this.noTelepon = noTelepon;
@@ -72,9 +70,10 @@ public abstract class User implements UserDetails {
     public int getIdUser() { return idUser; }
     public void setIdUser(int idUser) { this.idUser = idUser; }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    @Override
+    public String getUsername() { return email; }
 
+    @Override
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 

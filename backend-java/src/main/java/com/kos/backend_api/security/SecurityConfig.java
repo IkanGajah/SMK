@@ -23,9 +23,6 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
-
-    @Autowired
     private JwtAuthenticationFilter jwtAuthFilter;
 
     @Bean
