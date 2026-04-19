@@ -11,31 +11,24 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 
 const { width } = Dimensions.get('window');
 
+const FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxqro65wdqMJCGELbpTK2HPlNmzKiEwWj-175Ry_62ZyjHbh69ufz3Ui3mdnwCZ-wf2rD3csCqmLrvpdAQK5qrs8EFmKY63gUJWw09rdFdgembiQCkdBqIdEIMYb5Cnr-_FLQvaLKcN2Cxduy839CZ11uXEHIjX9gJQZQo9KXtlKm16o2xDAOzzOWdw8z2hBAxHEK0MswcAu6-tbgt7VAQcIgkquHOQHTER2LcngeE3Gw868DmomyNNSk0Ny7lWizBVAJRygj_LC8';
+
 // Data Dummy Rekomendasi
-const REKOMENDASI = [
+export const REKOMENDASI = [
   {
     id: 'r1',
     name: 'Kos Eksklusif Senayan Raya',
-    price: 'Rp 2.5jt',
+    price: 2500000,
     location: 'Jakarta Selatan',
     rating: 4.9,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxqro65wdqMJCGELbpTK2HPlNmzKiEwWj-175Ry_62ZyjHbh69ufz3Ui3mdnwCZ-wf2rD3csCqmLrvpdAQK5qrs8EFmKY63gUJWw09rdFdgembiQCkdBqIdEIMYb5Cnr-_FLQvaLKcN2Cxduy839CZ11uXEHIjX9gJQZQo9KXtlKm16o2xDAOzzOWdw8z2hBAxHEK0MswcAu6-tbgt7VAQcIgkquHOQHTER2LcngeE3Gw868DmomyNNSk0Ny7lWizBVAJRygj_LC8',
+    image: FALLBACK_IMAGE,
     facilities: ['WiFi', 'AC', 'Laundry'],
     available: 2
-  },
-  {
-    id: 'r2',
-    name: 'Kos Nyaman Tebet Barat',
-    price: 'Rp 1.8jt',
-    location: 'Jakarta Selatan',
-    rating: 4.8, // using an assumed rating since not explicitly on card
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCnaIDLGyfCnAhE6WcKF-nnmJyZZEtdT8SPEF9rAl906E8AvQhSRWALAS2xqnzpC4TufkgssCQ_uz55-X9rgfIvTknB9tRcIzBRc4GliNDvsBelN2tTSXCyrXZJMUlFPrVWTSbjsGMCzRvqsXSi8b3UCG9eQxnv3ZERTgjCqVFMIe1ywpJZcNAfRiuLoxt7w7g1XOVlNMM1HwcCkgdztoVkLthHRKQodThFKxPNAdYtjhY0tQRh9PCelKqWb8YE9Wxx8KisGRyqN_I',
-    facilities: ['WiFi', 'Dapur'],
-    available: 1
   }
 ];
 
@@ -74,11 +67,40 @@ export default function AuthenticatedCatalogScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('Semua');
+  const [rooms, setRooms] = useState<any[]>(REKOMENDASI);
+
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch('http://10.1.13.53:8080/api/kamar');
+      if (!response.ok) throw new Error('Server error');
+      const json = await response.json();
+      if (json.data && json.data.length > 0) {
+        // Ambil hanya kamar yang tersedia
+        const available = json.data.filter((r: any) => r.status === 'Available' || r.status === 'Tersedia');
+        if (available.length > 0) {
+          setRooms(available);
+        } else {
+          setRooms(REKOMENDASI);
+        }
+      }
+    } catch (error) {
+      console.log('API gagal, fallback ke dummy data.');
+      setRooms(REKOMENDASI);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchRooms();
+    }, [])
+  );
 
   const filterData = (data: any[]) => {
     return data.filter(item => {
-      const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.location.toLowerCase().includes(searchQuery.toLowerCase());
+      const nm = item.nomorKamar || item.name || '';
+      const loc = item.location || 'Lokasi Kos';
+      const matchSearch = nm.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          loc.toLowerCase().includes(searchQuery.toLowerCase());
       
       let matchFilter = activeFilter === 'Semua';
       if (activeFilter !== 'Semua') {
@@ -86,14 +108,14 @@ export default function AuthenticatedCatalogScreen() {
         if (activeFilter === 'Kos Putra' && itemType === 'Kos Putra') matchFilter = true;
         if (activeFilter === 'Kos Putri' && itemType === 'Kos Putri') matchFilter = true;
         if (activeFilter === 'Campur' && itemType === 'Kos Campur') matchFilter = true;
-        if (activeFilter === 'Eksklusif' && item.name.includes('Eksklusif')) matchFilter = true;
+        if (activeFilter === 'Eksklusif' && nm.includes('Eksklusif')) matchFilter = true;
       }
                           
       return matchSearch && matchFilter;
     });
   };
 
-  const filteredRekomendasi = filterData(REKOMENDASI);
+  const filteredRekomendasi = filterData(rooms);
   const filteredJelajahi = filterData(JELAJAHI);
 
   return (
@@ -187,7 +209,7 @@ export default function AuthenticatedCatalogScreen() {
                     ) : (
                       <View className="absolute top-2 left-2 px-2 py-1 bg-white/90 rounded-full flex-row items-center gap-1">
                         <MaterialIcons name="star" size={12} color="#3525cd" />
-                        <Text className="text-primary text-[10px] font-bold">{item.rating}</Text>
+                        <Text className="text-primary text-[10px] font-bold">{item.rating || '4.9'}</Text>
                       </View>
                     )}
                   </View>
@@ -195,23 +217,32 @@ export default function AuthenticatedCatalogScreen() {
                   <View className="flex-1 p-3 justify-between">
                     <View>
                       <Text className="font-bold text-base text-on-surface mb-1" numberOfLines={2}>
-                        {item.name}
+                        {item.nomorKamar || item.name}
                       </Text>
                       <Text className="text-xs text-on-surface-variant flex-row items-center mb-2">
-                        <MaterialIcons name="location-on" size={12} /> {item.location}
+                        <MaterialIcons name="location-on" size={12} /> {item.location || 'Lokasi Kos'}
                       </Text>
                       <View className="flex-row flex-wrap gap-1">
-                        {item.facilities.map((fac: string, i: number) => (
-                          <View key={i} className="px-1.5 py-0.5 bg-surface-container rounded flex-row items-center gap-1">
-                            <Text className="text-[9px] text-on-surface-variant">{fac}</Text>
+                        {item.fasilitas ? (
+                          <View className="px-1.5 py-0.5 bg-surface-container rounded flex-row items-center gap-1">
+                            <Text className="text-[9px] text-on-surface-variant">{item.fasilitas}</Text>
                           </View>
-                        ))}
+                        ) : (
+                          item.facilities?.map((fac: string, i: number) => (
+                            <View key={i} className="px-1.5 py-0.5 bg-surface-container rounded flex-row items-center gap-1">
+                              <Text className="text-[9px] text-on-surface-variant">{fac}</Text>
+                            </View>
+                          ))
+                        )}
                       </View>
                     </View>
 
                     <View className="flex-row justify-between items-end">
                       <View>
-                        <Text className="text-primary font-bold text-lg">{item.price}<Text className="text-[10px] font-normal text-on-surface-variant">/bln</Text></Text>
+                        <Text className="text-primary font-bold text-lg">
+                          Rp {item.harga ? item.harga.toLocaleString('id-ID') : item.price}
+                          <Text className="text-[10px] font-normal text-on-surface-variant">/bln</Text>
+                        </Text>
                       </View>
                       <View className="w-8 h-8 rounded-full bg-surface-container-high items-center justify-center">
                         <MaterialIcons name="arrow-forward" size={16} color="#464555" />
