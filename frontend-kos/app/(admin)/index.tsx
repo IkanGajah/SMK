@@ -5,7 +5,8 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Image,
-  Platform 
+  Platform,
+  Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -25,7 +26,10 @@ export default function AdminDashboardScreen() {
           <Text className="font-black text-2xl text-indigo-700 tracking-tighter">The Estate Admin</Text>
         </View>
 
-        <TouchableOpacity className="p-2 rounded-xl text-indigo-600 hover:bg-indigo-50 active:scale-95">
+        <TouchableOpacity 
+          onPress={() => Alert.alert("Notifikasi Admin", "Tidak ada pemberitahuan baru.")}
+          className="p-2 rounded-xl text-indigo-600 hover:bg-indigo-50 active:scale-95"
+        >
           <MaterialIcons name="notifications" size={24} color="#4f46e5" />
         </TouchableOpacity>
       </View>
@@ -102,7 +106,7 @@ export default function AdminDashboardScreen() {
         <View className="bg-surface-container-low rounded-xl p-5 flex-col gap-4 mb-8">
           <View className="flex-row justify-between items-center">
             <Text className="font-bold text-[20px] text-on-surface">Occupancy Trends</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => Alert.alert("Report", "Laporan sedang dihasilkan...")}>
               <Text className="text-primary text-xs font-semibold">View Report</Text>
             </TouchableOpacity>
           </View>

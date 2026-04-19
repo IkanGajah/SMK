@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as SecureStore from 'expo-secure-store';
 
 export default function AddRoomScreen() {
   const router = useRouter();
@@ -32,10 +33,13 @@ export default function AddRoomScreen() {
     setIsLoading(true);
 
     try {
+      const token = await SecureStore.getItemAsync('userToken');
+
       const response = await fetch('http://10.1.13.53:8080/api/kamar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           nomorKamar: roomName,
