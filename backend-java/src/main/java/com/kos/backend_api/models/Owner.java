@@ -1,17 +1,15 @@
-// package com.kos.backend_api.models;
-// import java.util.ArrayList;
-// import java.util.List;
+package com.kos.backend_api.models;
 
-// public class Owner extends User {
-//     private List<CabangKos> daftarCabang;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
-//     public Owner(String idUser, String username, String password, String nama, String noTelepon) {
-//         super(idUser, username, password, nama, noTelepon);
-//         this.daftarCabang = new ArrayList<>();
-//     }
+@Entity
+@Table(name = "owner")
+public class Owner extends User {
 
-//     public void tambahCabang(CabangKos cabang) {
-//         this.daftarCabang.add(cabang);
-//         System.out.println("Cabang " + cabang.getNamaCabang() + " berhasil ditambahkan oleh Owner.");
-//     }
-// }
+    public Owner() {}
+
+    public Owner(String password, String nama, String noTelepon, String email) {
+        super(password, nama, noTelepon, email);
+    }
+}

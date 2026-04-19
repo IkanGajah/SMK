@@ -1,10 +1,9 @@
 package com.kos.backend_api.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.kos.backend_api.models.enums.FasilitasKamar;
+import com.kos.backend_api.models.enums.StatusKamar;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "kamar")
@@ -12,30 +11,50 @@ public class Kamar {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    
+    @JsonProperty("id")
+    private int idKamar;
+
+    @ManyToOne
+    @JoinColumn(name = "id_cabang")
+    private CabangKos cabang;
+
     private String nomorKamar; 
-    private String fasilitas;
-    private int harga;
-    private String status; 
+    
+    @Enumerated(EnumType.STRING)
+    private FasilitasKamar fasilitas;
+    
+    @JsonProperty("harga")
+    private int hargaSewa;
+    
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("status")
+    private StatusKamar statusKetersediaan; 
 
     public Kamar() {}
 
-    public Kamar(String nomorKamar, String fasilitas, int harga, String status) {
+    public Kamar(CabangKos cabang, String nomorKamar, FasilitasKamar fasilitas, int hargaSewa, StatusKamar statusKetersediaan) {
+        this.cabang = cabang;
         this.nomorKamar = nomorKamar;
         this.fasilitas = fasilitas;
-        this.harga = harga;
-        this.status = status;
+        this.hargaSewa = hargaSewa;
+        this.statusKetersediaan = statusKetersediaan;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getIdKamar() { return idKamar; }
+    public void setIdKamar(int idKamar) { this.idKamar = idKamar; }
+
+    public CabangKos getCabang() { return cabang; }
+    public void setCabang(CabangKos cabang) { this.cabang = cabang; }
+
     public String getNomorKamar() { return nomorKamar; }
     public void setNomorKamar(String nomorKamar) { this.nomorKamar = nomorKamar; }
-    public String getFasilitas() { return fasilitas; }
-    public void setFasilitas(String fasilitas) { this.fasilitas = fasilitas; }
-    public int getHarga() { return harga; }
-    public void setHarga(int harga) { this.harga = harga; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+
+    public FasilitasKamar getFasilitas() { return fasilitas; }
+    public void setFasilitas(FasilitasKamar fasilitas) { this.fasilitas = fasilitas; }
+
+    public int getHargaSewa() { return hargaSewa; }
+    public void setHargaSewa(int hargaSewa) { this.hargaSewa = hargaSewa; }
+
+    public StatusKamar getStatusKetersediaan() { return statusKetersediaan; }
+    public void setStatusKetersediaan(StatusKamar statusKetersediaan) { this.statusKetersediaan = statusKetersediaan; }
 }

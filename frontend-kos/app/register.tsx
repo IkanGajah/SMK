@@ -14,13 +14,15 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { API_BASE_URL } from '@/constants/config';
 
 export default function RegisterScreen() {
   const router = useRouter();
   
   const [nama, setNama] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [noTelepon, setNoTelepon] = useState('');
+  const [noKtp, setNoKtp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
@@ -30,7 +32,7 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     // Validasi sederhana
-    if (!nama || !email || !phone || !password || !confirmPassword) {
+    if (!nama || !email || !noTelepon || !noKtp || !password || !confirmPassword) {
       Alert.alert("Error", "Semua kolom wajib diisi!");
       return;
     }
@@ -46,16 +48,12 @@ export default function RegisterScreen() {
     setIsLoading(true);
 
     try {
-      // ---------------------------------------------------------
-      // ⚠️ [PENANDA BACKEND] Panggil API Register di sini ⚠️
-      // ---------------------------------------------------------
-      // Contoh request ke backend:
-      /*
-      const response = await fetch('http://10.1.13.53:8080/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nama, email, phone, password })
+        body: JSON.stringify({ nama, email, noTelepon, password, noKtp })
       });
+      
       const data = await response.json();
       
       if (response.ok) {
@@ -64,15 +62,6 @@ export default function RegisterScreen() {
       } else {
         Alert.alert("Registrasi Gagal", data.message || "Gagal membuat akun");
       }
-      */
-
-      // Simulasi delay request (Hapus ini saat sudah connect backend)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      Alert.alert(
-        "Simulasi", 
-        "Request Registrasi dikirim!\n\nNama: " + nama + "\nEmail: " + email + "\n(Cek penanda di kode)",
-        [{ text: "OK", onPress: () => router.push('/login' as any) }]
-      );
       
     } catch (error) {
       console.error(error);
@@ -161,6 +150,24 @@ export default function RegisterScreen() {
                   </View>
                 </View>
 
+                {/* No KTP Field */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-on-surface-variant ml-1 mb-2">Nomor KTP (16 Digit)</Text>
+                  <View className="relative justify-center">
+                    <View className="absolute left-3 z-10">
+                      <MaterialIcons name="badge" size={20} color="#777587" />
+                    </View>
+                    <TextInput
+                      className="w-full pl-11 pr-4 py-3 bg-surface-container-highest rounded-xl text-on-surface h-[50px]"
+                      placeholder="Masukkan 16 digit NIK"
+                      placeholderTextColor="#777587"
+                      keyboardType="number-pad"
+                      value={noKtp}
+                      onChangeText={setNoKtp}
+                    />
+                  </View>
+                </View>
+
                 {/* No HP Field */}
                 <View className="mb-4">
                   <Text className="text-sm font-medium text-on-surface-variant ml-1 mb-2">No. HP</Text>
@@ -173,8 +180,8 @@ export default function RegisterScreen() {
                       placeholder="08xxxxxxxxxx"
                       placeholderTextColor="#777587"
                       keyboardType="phone-pad"
-                      value={phone}
-                      onChangeText={setPhone}
+                      value={noTelepon}
+                      onChangeText={setNoTelepon}
                     />
                   </View>
                 </View>

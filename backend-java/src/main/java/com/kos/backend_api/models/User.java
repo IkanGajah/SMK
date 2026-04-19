@@ -1,36 +1,88 @@
 package com.kos.backend_api.models;
 
-public class User {
-    protected String idUser;
-    protected String username;
-    private String password; //blom dipakai, tapi disimpen dulu
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
+
+@Entity
+@Table(name = "user")
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class User implements UserDetails {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected int idUser;
+
+
+    @JsonIgnore
+    protected String password;
+    
     protected String nama;
     protected String noTelepon;
-    protected boolean isLoggedIn;
+    
+    @Column(unique = true)
+    protected String email;
 
-    public User(String idUser, String username, String password, String nama, String noTelepon) {
-        this.idUser = idUser;
-        this.username = username;
+    public User() {}
+
+    public User(String password, String nama, String noTelepon, String email) {
         this.password = password;
         this.nama = nama;
         this.noTelepon = noTelepon;
-        this.isLoggedIn = false;
+        this.email = email;
     }
 
-    public boolean login(String inputUsername, String inputPassword) {
-        if (this.username.equals(inputUsername) && this.password.equals(inputPassword)) {
-            this.isLoggedIn = true;
-            System.out.println("[" + this.nama + "] Login berhasil.");
-            return true;
+    @JsonIgnore
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        String role = "ROLE_USER";
+        if (this instanceof Owner) {
+            role = "ROLE_OWNER";
+        } else if (this instanceof AdminCabang) {
+            role = "ROLE_ADMIN";
+        } else if (this instanceof Penyewa) {
+            role = "ROLE_PENYEWA";
         }
-        System.out.println("Login gagal. Username atau password salah.");
-        return false;
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
-    public void logout() {
-        this.isLoggedIn = false;
-        System.out.println("[" + this.nama + "] Logout berhasil.");
-    }
-    
-    public String getNama() { return this.nama; }
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @JsonIgnore
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @JsonIgnore
+    @Override
+    public boolean isEnabled() { return true; }
+
+    public int getIdUser() { return idUser; }
+    public void setIdUser(int idUser) { this.idUser = idUser; }
+
+    @Override
+    public String getUsername() { return email; }
+
+    @Override
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getNama() { return nama; }
+    public void setNama(String nama) { this.nama = nama; }
+
+    public String getNoTelepon() { return noTelepon; }
+    public void setNoTelepon(String noTelepon) { this.noTelepon = noTelepon; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 }

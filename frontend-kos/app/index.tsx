@@ -4,6 +4,7 @@ import { Text, View, FlatList, ActivityIndicator, StatusBar, TouchableOpacity, T
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { API_BASE_URL } from '@/constants/config';
 
 // Mock images for the beautiful UI representation
 const MOCK_IMAGES = [
@@ -49,7 +50,7 @@ export default function HomeScreen() {
   };
 
   const renderItem = ({ item, index }: { item: Kamar, index: number }) => {
-    const isAvailable = item.status === 'Tersedia';
+    const isAvailable = item.status?.toUpperCase() === 'TERSEDIA';
     const imageUrl = MOCK_IMAGES[index % MOCK_IMAGES.length];
     
     return (
@@ -69,9 +70,8 @@ export default function HomeScreen() {
         <View className="relative h-48 w-full bg-surface-container-highest">
           <Image 
             source={{ uri: imageUrl }} 
-            className={`w-full h-full ${!isAvailable ? 'opacity-70' : ''}`}
+            className={`w-full h-full ${!isAvailable ? 'opacity-50 grayscale' : ''}`}
             resizeMode="cover"
-            style={!isAvailable ? { tintColor: 'gray' } : {}}
           />
           {/* Status Badge */}
           <View className={`absolute top-4 left-4 flex-row items-center px-3 py-1.5 rounded-full ${isAvailable ? 'bg-secondary-container/95' : 'bg-surface-variant/95'}`}>
