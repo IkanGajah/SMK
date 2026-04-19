@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -72,6 +72,29 @@ const JELAJAHI = [
 
 export default function AuthenticatedCatalogScreen() {
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('Semua');
+
+  const filterData = (data: any[]) => {
+    return data.filter(item => {
+      const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          item.location.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      let matchFilter = activeFilter === 'Semua';
+      if (activeFilter !== 'Semua') {
+        const itemType = item.type || '';
+        if (activeFilter === 'Kos Putra' && itemType === 'Kos Putra') matchFilter = true;
+        if (activeFilter === 'Kos Putri' && itemType === 'Kos Putri') matchFilter = true;
+        if (activeFilter === 'Campur' && itemType === 'Kos Campur') matchFilter = true;
+        if (activeFilter === 'Eksklusif' && item.name.includes('Eksklusif')) matchFilter = true;
+      }
+                          
+      return matchSearch && matchFilter;
+    });
+  };
+
+  const filteredRekomendasi = filterData(REKOMENDASI);
+  const filteredJelajahi = filterData(JELAJAHI);
 
   return (
     <SafeAreaView className="flex-1 bg-surface pt-4" edges={['top', 'left', 'right']}>
@@ -111,6 +134,8 @@ export default function AuthenticatedCatalogScreen() {
                 className="w-full h-[52px] pl-12 pr-4 rounded-xl bg-surface-container-highest text-on-surface"
                 placeholder="Cari lokasi, nama kos..."
                 placeholderTextColor="#777587"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
               />
             </View>
             <TouchableOpacity className="h-[52px] px-5 rounded-xl bg-primary-container flex-row items-center gap-2 shadow-sm">
@@ -121,12 +146,19 @@ export default function AuthenticatedCatalogScreen() {
 
           {/* Chips */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-4" contentContainerStyle={{ gap: 12, paddingRight: 20 }}>
-            <TouchableOpacity className="px-5 py-2.5 rounded-full bg-tertiary-container shadow-sm">
-              <Text className="text-on-tertiary-container font-medium text-sm">Semua</Text>
+            <TouchableOpacity 
+              onPress={() => setActiveFilter('Semua')}
+              className={`px-5 py-2.5 rounded-full shadow-sm ${activeFilter === 'Semua' ? 'bg-tertiary-container' : 'bg-surface-container-lowest'}`}
+            >
+              <Text className={`font-medium text-sm ${activeFilter === 'Semua' ? 'text-on-tertiary-container' : 'text-on-surface-variant'}`}>Semua</Text>
             </TouchableOpacity>
             {['Kos Putra', 'Kos Putri', 'Campur', 'Eksklusif'].map((cat, i) => (
-              <TouchableOpacity key={i} className="px-5 py-2.5 rounded-full bg-surface-container-lowest shadow-sm">
-                <Text className="text-on-surface-variant font-medium text-sm">{cat}</Text>
+              <TouchableOpacity 
+                key={i} 
+                onPress={() => setActiveFilter(cat)}
+                className={`px-5 py-2.5 rounded-full shadow-sm ${activeFilter === cat ? 'bg-tertiary-container' : 'bg-surface-container-lowest'}`}
+              >
+                <Text className={`font-medium text-sm ${activeFilter === cat ? 'text-on-tertiary-container' : 'text-on-surface-variant'}`}>{cat}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -138,7 +170,7 @@ export default function AuthenticatedCatalogScreen() {
             <Text className="font-bold text-[22px] text-on-surface mb-5">Rekomendasi Untukmu</Text>
             
             <View className="gap-5">
-              {REKOMENDASI.map((item) => (
+              {filteredRekomendasi.length > 0 ? filteredRekomendasi.map((item) => (
                 <TouchableOpacity 
                   key={item.id}
                   onPress={() => router.push(`/kamar/${item.id}` as any)}
@@ -169,7 +201,7 @@ export default function AuthenticatedCatalogScreen() {
                         <MaterialIcons name="location-on" size={12} /> {item.location}
                       </Text>
                       <View className="flex-row flex-wrap gap-1">
-                        {item.facilities.map((fac, i) => (
+                        {item.facilities.map((fac: string, i: number) => (
                           <View key={i} className="px-1.5 py-0.5 bg-surface-container rounded flex-row items-center gap-1">
                             <Text className="text-[9px] text-on-surface-variant">{fac}</Text>
                           </View>
@@ -187,7 +219,9 @@ export default function AuthenticatedCatalogScreen() {
                     </View>
                   </View>
                 </TouchableOpacity>
-              ))}
+              )) : (
+                <Text className="text-on-surface-variant text-center my-4">Tidak ada rekomendasi yang sesuai.</Text>
+              )}
             </View>
           </View>
         </View>
@@ -196,7 +230,7 @@ export default function AuthenticatedCatalogScreen() {
         <View className="mt-8 px-4">
           <Text className="font-bold text-[22px] text-on-surface mb-5">Jelajahi Lebih Banyak</Text>
           <View className="flex-row flex-wrap justify-between">
-            {JELAJAHI.map((item) => (
+            {filteredJelajahi.length > 0 ? filteredJelajahi.map((item) => (
               <TouchableOpacity 
                 key={item.id}
                 onPress={() => router.push(`/kamar/${item.id}` as any)}
@@ -228,12 +262,16 @@ export default function AuthenticatedCatalogScreen() {
                   </View>
                 </View>
               </TouchableOpacity>
-            ))}
+            )) : (
+              <Text className="text-on-surface-variant text-center w-full my-4">Tidak ada kos yang sesuai.</Text>
+            )}
           </View>
           
+          {filteredJelajahi.length > 0 && (
           <TouchableOpacity className="mt-4 px-8 py-3 rounded-xl bg-surface-container-lowest border border-outline-variant/20 items-center">
             <Text className="font-medium text-on-surface">Muat Lebih Banyak</Text>
           </TouchableOpacity>
+          )}
         </View>
 
       </ScrollView>
