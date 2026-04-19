@@ -59,6 +59,37 @@ export default function DetailKamarScreen() {
     setActiveImageIndex(Math.round(index));
   };
 
+  const handleSewa = async () => {
+    try {
+      const payload = {
+        kamar: { id: kamar?.id },
+        penyewa: { id: 1 }, // Dummy Penyewa ID 1
+        tanggalMulaiSewa: new Date().toISOString().split('T')[0],
+        durasiBulan: 1
+      };
+      
+      const res = await fetch('http://10.1.13.53:8080/api/transaksi/check-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (res.ok) {
+        Alert.alert("Check-in Sukses", "Anda telah berhasil menyewa kamar ini!", [
+          { text: "Lihat Sewa Saya", onPress: () => router.push('/(tabs)/rent' as any) }
+        ]);
+        // Refresh detail kamar
+        fetchDetailKamar();
+      } else {
+        const errorData = await res.json().catch(()=>({}));
+        Alert.alert("Gagal", errorData.message || "Terjadi kesalahan saat menyewa.");
+      }
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Error", "Gagal menghubungi server backend.");
+    }
+  };
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-surface">
@@ -236,12 +267,12 @@ export default function DetailKamarScreen() {
           onPress={() => {
             Alert.alert(
               "Konfirmasi Sewa",
-              `Anda akan diarahkan ke halaman pembayaran untuk Kamar ${kamar.nomorKamar}. Lanjutkan?`,
+              `Anda akan menyewa Kamar ${kamar.nomorKamar} untuk 1 bulan. Lanjutkan?`,
               [
                 { text: "Batal", style: "cancel" },
                 { 
                   text: "Lanjutkan", 
-                  onPress: () => router.push('/(tabs)/rent' as any) 
+                  onPress: handleSewa
                 }
               ]
             );
