@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, ActivityIndicator, TouchableOpacity, StatusBar, Image, ScrollView, Dimensions, Platform } from 'react-native';
+import { Text, View, ActivityIndicator, TouchableOpacity, StatusBar, Image, ScrollView, Dimensions, Platform, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { Kamar } from '@/types/types';
-
-const { width } = Dimensions.get('window');
-
-const MOCK_IMAGES = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBXZq1QRrbtKy3jJiqPi_DvjSSD7s6HUKuaN0C36Nvh5t6zqxmDkF3lKkFN2a_ND_cfhozQpGzztth9NCgGPpR_w4Gv_9lE0cLuaW-pSvJxD8p3YmXriK7-Nl28W6gaFpIriU9J6lUIU_NNKNU0u-nfIhn0ZhCW8U9jFQkUkY96tNrcth4xJH-90i-SNwvYt96wjY1U70Tb7hBCC-hqC4-l-zSXS7dbgs1lz5VgczJSVbEMvGfyC0Qb1SOsAZl9k7TM8NeDeqwbGP8",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCK2USxE6VKzFXonzNOEaHTH8iZU7qchm9dLjLzUrM1nklP-nfTP_77QS8m23MIdMWGWdpAkpYz-sLdXfgftrXrvHA-G_7P7Y5YPk65QL_0rE6GixEK4zknpSOgSpjaXyjFiyn7d6rOvjF4nqa1tuc1YBLl0DM3pXRPluGaU4HjSMf2IjKW_tHWCQ1jgiCQdhruHGE9Ev9w8o0oz9ovtoeaQkn9Ce_BlMmpdoOyEiN87XNLkX2U64hEkOKAxWhsZVJorS0j7_TM4W0"
-];
 
 export default function DetailKamarScreen() {
   const { id } = useLocalSearchParams();
@@ -233,6 +226,19 @@ export default function DetailKamarScreen() {
         <TouchableOpacity 
           className={`w-full h-14 rounded-xl flex-row items-center justify-center gap-2 active:scale-95 ${isAvailable ? 'bg-primary' : 'bg-surface-variant'}`}
           disabled={!isAvailable}
+          onPress={() => {
+            Alert.alert(
+              "Konfirmasi Sewa",
+              `Anda akan diarahkan ke halaman pembayaran untuk Kamar ${kamar.nomorKamar}. Lanjutkan?`,
+              [
+                { text: "Batal", style: "cancel" },
+                { 
+                  text: "Lanjutkan", 
+                  onPress: () => router.push('/(tabs)/rent' as any) 
+                }
+              ]
+            );
+          }}
         >
           <Text className={`font-bold text-lg ${isAvailable ? 'text-on-primary' : 'text-on-surface-variant'}`}>
             {isAvailable ? 'Sewa Kamar Ini' : 'Kamar Tidak Tersedia'}
