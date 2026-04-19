@@ -1,48 +1,74 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   View, 
   Text, 
   ScrollView, 
   TouchableOpacity, 
   Image,
-  TextInput
+  TextInput,
+  Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter, useFocusEffect } from 'expo-router';
 
-// Data Dummy
-const ROOMS_DATA = [
+// Fallback image since backend doesn't have image field yet
+const FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMsiOEr6jpsbQ-59R08kDaVoD3YkJY71p-xL9DkOhw1rpnhQ0jITL192xH6rcKJDl00-XzNLEXJHzjvQFC3wjRB2uQe4JEGJ-yqcCYrvuOI4hSbT_vBa9ibBlp-m94dvEs2ewzIuQcgR1YIvc1-y5ZvSTmsKeyaMSAZBwOqnBiKQ_T5ZNWkA-HNtx-i9j26g85D8onp9qeG3Bbx21R-3x7CGQAJaqMpCUTy2qbTTB1T3UKuXDuWb77cD8vQ-FKwp3MAQPT_H5KLDA';
+
+export let ROOMS_DATA: any[] = [
   {
     id: 'r1',
-    name: 'Suite 402',
-    price: '$1,850',
-    details: '1 Bed • 1 Bath • 750 sqft',
+    nomorKamar: 'Suite 402',
+    harga: 1850000,
+    fasilitas: '1 Bed • 1 Bath • 750 sqft',
     status: 'Available',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMsiOEr6jpsbQ-59R08kDaVoD3YkJY71p-xL9DkOhw1rpnhQ0jITL192xH6rcKJDl00-XzNLEXJHzjvQFC3wjRB2uQe4JEGJ-yqcCYrvuOI4hSbT_vBa9ibBlp-m94dvEs2ewzIuQcgR1YIvc1-y5ZvSTmsKeyaMSAZBwOqnBiKQ_T5ZNWkA-HNtx-i9j26g85D8onp9qeG3Bbx21R-3x7CGQAJaqMpCUTy2qbTTB1T3UKuXDuWb77cD8vQ-FKwp3MAQPT_H5KLDA',
+    image: FALLBACK_IMAGE,
     tenant: null
   },
   {
     id: 'r2',
-    name: 'Apt 215',
-    price: '$2,100',
-    details: '2 Bed • 2 Bath • 1100 sqft',
+    nomorKamar: 'Apt 215',
+    harga: 2100000,
+    fasilitas: '2 Bed • 2 Bath • 1100 sqft',
     status: 'Occupied',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAO3leihuQEcrEdVvfh37VmDG1nSPo_q_aQ6i-24T4U_N3dkZxjwAJNwsRsBHSPhqycOW6fKzPaPhk4BgFLoKsn_nZeOW8oEGvyGf_I9R3YWiOpnUCHyQO8v7RoYkMd6JnSFLSB8JMZgYaBKAAYLAlZcB2oy-hF1N0zboM1Qokanrn2Q3LlOE9iVC055DAlEwzKrxgpDw_1GUIMRUrzG7NxN06Gk_kikj8OLXOKg0a8jyfGSjuXeI0v0pxrkP78ua6060EcfldOjkk',
+    image: FALLBACK_IMAGE,
     tenant: { initials: 'JD', name: 'John Doe' }
-  },
-  {
-    id: 'r3',
-    name: 'Studio 105',
-    price: '$1,450',
-    details: 'Studio • 1 Bath • 500 sqft',
-    status: 'Maintenance',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBUJADqgkC6u67qv7q3fNXAWmo1ReBGp6K4L-UyQqjVgIsIKL-W_GujeBD-U8agORDgbo_cjLRUmybkXzSRcqjFPcXt1Cza7vyEpnY4A3QGleQcfveH-Dt7gIp1sOalZMBN5Ns3LIYeSFvPYsJ1JF-NO_Rtn0LvOlv_FJvOIM4poIzlPFKgudqZmEVVp9XWg8juY5wxWt3R6EmHBnmbmTmdcdingI84glUpLHeC8RGk_wskyma6eRcC22h13fytBBM6gBUv9lxoA88',
-    tenant: null
   }
 ];
 
 export default function AdminRoomsScreen() {
+  const router = useRouter();
+  const [roomsList, setRoomsList] = useState<any[]>([]);
+
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch('http://10.1.13.53:8080/api/kamar');
+      
+      if (!response.ok) {
+        throw new Error('Server error');
+      }
+
+      const json = await response.json();
+      if (json.data && json.data.length > 0) {
+        // Balik array agar kamar terbaru di atas (opsional, tergantung urutan DB)
+        setRoomsList(json.data.reverse());
+      } else {
+        // Jika API berhasil tapi datanya kosong, gunakan fallback data dummy
+        setRoomsList([...ROOMS_DATA]);
+      }
+    } catch (error) {
+      console.error("Gagal menarik data kamar, menggunakan data dummy:", error);
+      setRoomsList([...ROOMS_DATA]);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchRooms();
+    }, [])
+  );
+  
   return (
     <SafeAreaView className="flex-1 bg-surface pt-4" edges={['top', 'left', 'right']}>
       
@@ -56,7 +82,10 @@ export default function AdminRoomsScreen() {
           <Text className="font-black text-2xl text-indigo-700 tracking-tighter">The Estate Admin</Text>
         </View>
 
-        <TouchableOpacity className="p-2 rounded-xl text-indigo-600 active:scale-95">
+        <TouchableOpacity 
+          onPress={() => Alert.alert("Notifikasi Admin", "Tidak ada pemberitahuan baru.")}
+          className="p-2 rounded-xl text-indigo-600 active:scale-95"
+        >
           <MaterialIcons name="notifications" size={24} color="#4f46e5" />
         </TouchableOpacity>
       </View>
@@ -85,20 +114,32 @@ export default function AdminRoomsScreen() {
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
-            <TouchableOpacity className="bg-surface-container-lowest flex-row items-center gap-2 px-6 h-[40px] rounded-xl shadow-sm mr-2 border border-outline-variant/10">
+            <TouchableOpacity 
+              onPress={() => Alert.alert("Filter", "Menampilkan semua status kamar.")}
+              className="bg-surface-container-lowest flex-row items-center gap-2 px-6 h-[40px] rounded-xl shadow-sm mr-2 border border-outline-variant/10"
+            >
               <MaterialIcons name="filter-list" size={18} color="#191c1e" />
               <Text className="font-semibold text-sm text-on-surface">All Status</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity className="bg-surface-container-highest px-6 h-[40px] rounded-xl justify-center mr-2">
+            <TouchableOpacity 
+              onPress={() => Alert.alert("Filter", "Menampilkan kamar yang tersedia.")}
+              className="bg-surface-container-highest px-6 h-[40px] rounded-xl justify-center mr-2"
+            >
               <Text className="font-semibold text-sm text-on-surface-variant">Available</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity className="bg-surface-container-highest px-6 h-[40px] rounded-xl justify-center mr-2">
+            <TouchableOpacity 
+              onPress={() => Alert.alert("Filter", "Menampilkan kamar yang sedang ditempati.")}
+              className="bg-surface-container-highest px-6 h-[40px] rounded-xl justify-center mr-2"
+            >
               <Text className="font-semibold text-sm text-on-surface-variant">Occupied</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity className="bg-surface-container-highest px-6 h-[40px] rounded-xl justify-center">
+            <TouchableOpacity 
+              onPress={() => Alert.alert("Filter", "Menampilkan kamar dalam perbaikan.")}
+              className="bg-surface-container-highest px-6 h-[40px] rounded-xl justify-center"
+            >
               <Text className="font-semibold text-sm text-on-surface-variant">Maintenance</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -106,12 +147,12 @@ export default function AdminRoomsScreen() {
 
         {/* Room Grid */}
         <View className="flex-col gap-6">
-          {ROOMS_DATA.map((room) => (
+          {roomsList.map((room) => (
             <View key={room.id} className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm border border-outline-variant/10 flex-col relative">
               
               <View className="h-48 relative overflow-hidden bg-surface-container-highest">
                 <Image 
-                  source={{ uri: room.image }} 
+                  source={{ uri: FALLBACK_IMAGE }} 
                   className={`w-full h-full ${room.status === 'Maintenance' ? 'opacity-80' : ''}`}
                   resizeMode="cover"
                 />
@@ -141,12 +182,13 @@ export default function AdminRoomsScreen() {
               <View className="p-5 flex-1 flex-col justify-between bg-surface-container-lowest relative z-10">
                 <View>
                   <View className="flex-row justify-between items-start mb-2">
-                    <Text className="font-black text-[22px] text-on-surface">{room.name}</Text>
+                    <Text className="font-black text-[22px] text-on-surface">{room.nomorKamar}</Text>
                     <Text className="font-extrabold text-[20px] tracking-tight text-on-surface">
-                      {room.price}<Text className="text-sm font-normal text-on-surface-variant">/mo</Text>
+                      Rp {room.harga ? room.harga.toLocaleString('id-ID') : 0}
+                      <Text className="text-sm font-normal text-on-surface-variant">/bln</Text>
                     </Text>
                   </View>
-                  <Text className="text-on-surface-variant text-sm mb-4">{room.details}</Text>
+                  <Text className="text-on-surface-variant text-sm mb-4">{room.fasilitas}</Text>
                   
                   {room.tenant && (
                     <View className="bg-surface-container-low p-3 rounded-lg mb-4">
@@ -161,7 +203,10 @@ export default function AdminRoomsScreen() {
                   )}
                 </View>
 
-                <TouchableOpacity className="w-full bg-surface-container-highest active:bg-surface-container-high py-3 rounded-lg items-center mt-2">
+                <TouchableOpacity 
+                  onPress={() => Alert.alert("Aksi Kamar", `Membuka pengaturan untuk kamar ${room.nomorKamar}...`)}
+                  className="w-full bg-surface-container-highest active:bg-surface-container-high py-3 rounded-lg items-center mt-2"
+                >
                   <Text className="text-on-surface font-semibold text-sm">
                     {room.status === 'Available' ? 'Edit' : room.status === 'Occupied' ? 'Manage' : 'Update Status'}
                   </Text>
@@ -176,6 +221,7 @@ export default function AdminRoomsScreen() {
 
       {/* FAB: Add Room */}
       <TouchableOpacity 
+        onPress={() => router.push('/(admin)/add-room' as any)}
         className="absolute right-6 bottom-24 w-14 h-14 rounded-xl items-center justify-center shadow-lg z-40 active:scale-95"
         style={{ elevation: 5 }}
       >
