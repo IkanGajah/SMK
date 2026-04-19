@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as SecureStore from 'expo-secure-store';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -55,13 +56,20 @@ export default function LoginScreen() {
 
       // Simulasi delay request (Hapus ini saat sudah connect backend)
       await new Promise(resolve => setTimeout(resolve, 1500));
+      const handleRoleSelection = async (role: string, route: string) => {
+        // Simulasi penyimpanan token
+        await SecureStore.setItemAsync('userToken', 'dummy-token-12345');
+        await SecureStore.setItemAsync('userRole', role);
+        router.replace(route as any);
+      };
+
       Alert.alert(
         "Simulasi Login", 
         "Pilih peran (role) untuk masuk:",
         [
-          { text: "Tenant", onPress: () => router.replace('/(tabs)' as any) },
-          { text: "Admin", onPress: () => router.replace('/(admin)' as any) },
-          { text: "Owner", onPress: () => router.replace('/(owner)' as any) }
+          { text: "Tenant", onPress: () => handleRoleSelection('Tenant', '/(tabs)') },
+          { text: "Admin", onPress: () => handleRoleSelection('Admin', '/(admin)') },
+          { text: "Owner", onPress: () => handleRoleSelection('Owner', '/(owner)') }
         ]
       );
       
