@@ -45,7 +45,10 @@ export default function ProfileScreen() {
           <Text className="text-primary font-black text-2xl tracking-tight">The Estate</Text>
         </View>
 
-        <TouchableOpacity className="hover:opacity-80 active:scale-95">
+        <TouchableOpacity 
+          onPress={() => Alert.alert("Notifikasi", "Belum ada pesan dari pengelola Kos.")}
+          className="hover:opacity-80 active:scale-95"
+        >
           <MaterialIcons name="notifications" size={24} color="#777587" />
         </TouchableOpacity>
       </View>
@@ -63,7 +66,10 @@ export default function ProfileScreen() {
               source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjHPs9An2k4HaWYn9ODmuclylgP0HNr6De9nodxvnnuSpnyskAheLsi3_uNX99by9QV8OTyXf7dmmIIHisGh5PF76e2dSX0f_h3APFxjJg28auzAzGmA-DJyv4l_xhvkxLuMaTJQrVV0LorrmOSmcX6Zq2b3lDHjbhgULKuGSn7rRqAfVLmsNDu3uE4lL1zYiQ4GBauLttwrmPVU-OlbWZJG7wMIxxhunfqCC9jFwrgKjaiEvfGE-KIq36sc_CaxtOHbtoQUxMuYM' }}
               className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover shadow-lg border-4 border-surface-container-lowest"
             />
-            <TouchableOpacity className="absolute bottom-0 right-0 bg-primary w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-95">
+            <TouchableOpacity 
+              onPress={() => Alert.alert("Fitur Edit Foto", "Fitur ubah foto profil akan segera hadir!")}
+              className="absolute bottom-0 right-0 bg-primary w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-95"
+            >
               <MaterialIcons name="edit" size={20} color="#ffffff" />
             </TouchableOpacity>
           </View>
@@ -74,7 +80,10 @@ export default function ProfileScreen() {
         {/* Settings List */}
         <View className="bg-surface-container-lowest rounded-2xl p-2 mb-8 shadow-sm">
           
-          <TouchableOpacity className="flex-row items-center justify-between p-4 rounded-xl active:bg-surface-container-low mb-1">
+          <TouchableOpacity 
+            onPress={() => Alert.alert("Edit Profile", "Halaman pengaturan profil sedang dalam pengembangan.")}
+            className="flex-row items-center justify-between p-4 rounded-xl active:bg-surface-container-low mb-1"
+          >
             <View className="flex-row items-center gap-4">
               <View className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
                 <MaterialIcons name="person" size={22} color="#3525cd" />
@@ -84,7 +93,10 @@ export default function ProfileScreen() {
             <MaterialIcons name="chevron-right" size={24} color="#777587" />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row items-center justify-between p-4 rounded-xl active:bg-surface-container-low mb-1">
+          <TouchableOpacity 
+            onPress={() => Alert.alert("Notifikasi", "Anda belum memiliki notifikasi baru.")}
+            className="flex-row items-center justify-between p-4 rounded-xl active:bg-surface-container-low mb-1"
+          >
             <View className="flex-row items-center gap-4">
               <View className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
                 <MaterialIcons name="notifications-active" size={22} color="#3525cd" />
@@ -94,7 +106,10 @@ export default function ProfileScreen() {
             <MaterialIcons name="chevron-right" size={24} color="#777587" />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row items-center justify-between p-4 rounded-xl active:bg-surface-container-low mb-1">
+          <TouchableOpacity 
+            onPress={() => Alert.alert("Contact Admin", "Membuka obrolan WhatsApp dengan Admin...")}
+            className="flex-row items-center justify-between p-4 rounded-xl active:bg-surface-container-low mb-1"
+          >
             <View className="flex-row items-center gap-4">
               <View className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
                 <MaterialIcons name="support-agent" size={22} color="#3525cd" />
@@ -104,7 +119,10 @@ export default function ProfileScreen() {
             <MaterialIcons name="chevron-right" size={24} color="#777587" />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row items-center justify-between p-4 rounded-xl active:bg-surface-container-low">
+          <TouchableOpacity 
+            onPress={() => Alert.alert("Pusat Bantuan", "Halaman FAQ (Frequently Asked Questions) sedang dikerjakan.")}
+            className="flex-row items-center justify-between p-4 rounded-xl active:bg-surface-container-low"
+          >
             <View className="flex-row items-center gap-4">
               <View className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
                 <MaterialIcons name="help" size={22} color="#3525cd" />
