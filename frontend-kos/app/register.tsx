@@ -46,39 +46,33 @@ export default function RegisterScreen() {
     setIsLoading(true);
 
     try {
-      // ---------------------------------------------------------
-      // ⚠️ [PENANDA BACKEND] Panggil API Register di sini ⚠️
-      // ---------------------------------------------------------
-      // Contoh request ke backend:
-      /*
-      const response = await fetch('http://10.1.13.53:8080/api/auth/register', {
+      const response = await fetch('http://10.1.13.53:8080/api/penyewa', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nama, email, phone, password })
+        body: JSON.stringify({ 
+          namaLengkap: nama, 
+          email: email, 
+          telepon: phone, 
+          password: password 
+        })
       });
-      const data = await response.json();
-      
-      if (response.ok) {
-        Alert.alert("Sukses", "Akun berhasil dibuat! Silakan login.");
-        router.replace('/login');
-      } else {
-        Alert.alert("Registrasi Gagal", data.message || "Gagal membuat akun");
-      }
-      */
 
-      // Simulasi delay request (Hapus ini saat sudah connect backend)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      Alert.alert(
-        "Simulasi", 
-        "Request Registrasi dikirim!\n\nNama: " + nama + "\nEmail: " + email + "\n(Cek penanda di kode)",
-        [{ text: "OK", onPress: () => router.push('/login' as any) }]
-      );
-      
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Gagal menghubungi server");
-    } finally {
       setIsLoading(false);
+
+      if (response.ok) {
+        Alert.alert(
+          "Registrasi Berhasil", 
+          "Akun Anda telah berhasil dibuat di database. Silakan login.",
+          [{ text: "Menuju Login", onPress: () => router.replace('/login' as any) }]
+        );
+      } else {
+        const data = await response.json().catch(() => ({}));
+        Alert.alert("Registrasi Gagal", data.message || "Terjadi kesalahan saat pendaftaran");
+      }
+    } catch (error) {
+      setIsLoading(false);
+      console.error(error);
+      Alert.alert("Error", "Gagal menghubungi server. Pastikan backend berjalan di 10.1.13.53:8080");
     }
   };
 
