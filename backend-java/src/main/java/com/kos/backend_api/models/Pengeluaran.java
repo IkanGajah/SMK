@@ -1,4 +1,5 @@
 package com.kos.backend_api.models;
+
 import java.time.LocalDateTime;
 
 public class Pengeluaran {
@@ -16,6 +17,23 @@ public class Pengeluaran {
         this.tanggal = LocalDateTime.now();
     }
 
-    public double getNominal() { return this.nominal; }
-    public String getKategori() { return this.kategori; }
+    public double getNominal() {
+        return this.nominal;
+    }
+
+    public String getKategori() {
+        return this.kategori;
+    }
+
+    public String getIdPengeluaran() {
+        return this.idPengeluaran;
+    }
+
+    public String getDeskripsi() {
+        return this.deskripsi;
+    }
+
+    public LocalDateTime getTanggal() {
+        return this.tanggal;
+    }
 }

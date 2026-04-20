@@ -79,7 +79,7 @@ public class TransaksiController {
 
     @PostMapping("/check-out/{idTransaksi}")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    public WebResponse<String> checkOut(@PathVariable Integer idTransaksi) {
+    public WebResponse<String> checkOut(@PathVariable int idTransaksi) {
         TransaksiSewa transaksi = transaksiRepository.findById(idTransaksi)
                 .orElseThrow(() -> new RuntimeException("Data transaksi tidak ditemukan"));
 

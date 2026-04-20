@@ -24,9 +24,11 @@ export default function HomeScreen() {
   const router = useRouter();
   const [kamar, setKamar] = useState<Kamar[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('Semua');
 
   // Ganti berdasarkan IP laptop saat ini
-  const API_URL = `${API_BASE_URL}/api/kamar`;
+  const API_URL = `${API_BASE_URL}/kamar`;
 
   useEffect(() => {
     fetchKamar();
@@ -52,9 +54,9 @@ export default function HomeScreen() {
   const renderItem = ({ item, index }: { item: Kamar, index: number }) => {
     const isAvailable = item.status?.toUpperCase() === 'TERSEDIA';
     const imageUrl = MOCK_IMAGES[index % MOCK_IMAGES.length];
-    
+
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => router.push(`/kamar/${item.id}` as any)}
         activeOpacity={0.8}
         className={`bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/30 shadow-sm mb-6 mx-4 ${!isAvailable ? 'opacity-80' : ''}`}
@@ -68,24 +70,24 @@ export default function HomeScreen() {
         }
       >
         <View className="relative h-48 w-full bg-surface-container-highest">
-          <Image 
-            source={{ uri: imageUrl }} 
+          <Image
+            source={{ uri: imageUrl }}
             className={`w-full h-full ${!isAvailable ? 'opacity-50 grayscale' : ''}`}
             resizeMode="cover"
           />
           {/* Status Badge */}
           <View className={`absolute top-4 left-4 flex-row items-center px-3 py-1.5 rounded-full ${isAvailable ? 'bg-secondary-container/95' : 'bg-surface-variant/95'}`}>
-            <MaterialIcons 
-              name={isAvailable ? "check-circle" : "event-busy"} 
-              size={14} 
-              color={isAvailable ? "#006f64" : "#464555"} 
+            <MaterialIcons
+              name={isAvailable ? "check-circle" : "event-busy"}
+              size={14}
+              color={isAvailable ? "#006f64" : "#464555"}
             />
             <Text className={`font-bold text-xs ml-1 ${isAvailable ? 'text-on-secondary-container' : 'text-on-surface-variant'}`}>
               {item.status}
             </Text>
           </View>
         </View>
-        
+
         <View className="p-5 flex-col justify-between">
           <View>
             <View className="flex-row justify-between items-start mb-2">
@@ -95,12 +97,12 @@ export default function HomeScreen() {
                 <Text className="text-outline text-sm ml-1 font-medium">{isAvailable ? '4.8' : '4.5'}</Text>
               </View>
             </View>
-            
+
             <Text className="text-on-surface-variant mb-4 text-sm leading-5" numberOfLines={2}>
               {item.fasilitas}
             </Text>
           </View>
-          
+
           <View className="mt-2 pt-4 border-t border-outline-variant/30 flex-row justify-between items-end">
             <View>
               <Text className="text-xs text-outline mb-1 font-medium">Harga Sewa</Text>
@@ -114,23 +116,41 @@ export default function HomeScreen() {
     );
   };
 
+  const filteredKamar = kamar.filter(item => {
+    const matchesSearch = item.nomorKamar.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.fasilitas && item.fasilitas.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    if (!matchesSearch) return false;
+
+    if (activeFilter === 'Semua') return true;
+    if (activeFilter === 'Tersedia') return item.status?.toUpperCase() === 'TERSEDIA';
+    if (activeFilter === '< 1jt') return item.harga < 1000000;
+    if (activeFilter === 'AC') return item.fasilitas && item.fasilitas.toUpperCase().includes('AC');
+    if (activeFilter === 'KM Dalam') return item.fasilitas && item.fasilitas.toUpperCase().includes('KM DALAM');
+
+    return true;
+  });
+
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="#f7f9fb" />
-      
+
       {/* Top App Bar */}
       <View className="flex-row justify-between items-center px-6 py-4 bg-surface/90 z-50 border-b border-surface-container-highest">
         <View className="flex-row items-center">
           <MaterialIcons name="domain" size={28} color="#3525cd" />
           <Text className="font-black text-2xl text-primary ml-2 tracking-tight">KosKu</Text>
         </View>
-        <TouchableOpacity className="bg-primary px-6 py-2.5 rounded-xl shadow-sm">
+        <TouchableOpacity
+          className="bg-primary px-6 py-2.5 rounded-xl shadow-sm"
+          onPress={() => router.push('/login')}
+        >
           <Text className="text-on-primary font-bold text-sm">Login</Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={kamar}
+        data={filteredKamar}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
@@ -146,33 +166,50 @@ export default function HomeScreen() {
                 className="w-full bg-surface-container-highest border border-outline-variant/50 rounded-xl h-[50px] pl-12 pr-4 text-on-surface font-medium text-base"
                 placeholder="Cari kamar..."
                 placeholderTextColor="#777587"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
               />
             </View>
 
             {/* Filter Chips */}
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false} 
-              className="flex-row px-4 mb-6" 
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="flex-row px-4 mb-6"
               contentContainerStyle={{ paddingRight: 32 }}
             >
-              <TouchableOpacity className="bg-primary-container px-6 py-2.5 rounded-full mr-3 shadow-sm">
-                <Text className="text-on-primary-container font-semibold text-sm">Semua</Text>
+              <TouchableOpacity
+                onPress={() => setActiveFilter('Semua')}
+                className={`px-6 py-2.5 rounded-full mr-3 shadow-sm ${activeFilter === 'Semua' ? 'bg-primary-container' : 'bg-surface-container-highest border border-outline-variant/20'}`}
+              >
+                <Text className={`font-semibold text-sm ${activeFilter === 'Semua' ? 'text-on-primary-container' : 'text-on-surface-variant font-medium'}`}>Semua</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="bg-surface-container-highest px-5 py-2.5 rounded-full mr-3 border border-outline-variant/20">
-                <Text className="text-on-surface-variant font-medium text-sm">Tersedia</Text>
+              <TouchableOpacity
+                onPress={() => setActiveFilter('Tersedia')}
+                className={`px-5 py-2.5 rounded-full mr-3 ${activeFilter === 'Tersedia' ? 'bg-primary-container shadow-sm' : 'bg-surface-container-highest border border-outline-variant/20'}`}
+              >
+                <Text className={`text-sm ${activeFilter === 'Tersedia' ? 'text-on-primary-container font-semibold' : 'text-on-surface-variant font-medium'}`}>Tersedia</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="bg-surface-container-highest px-5 py-2.5 rounded-full mr-3 border border-outline-variant/20">
-                <Text className="text-on-surface-variant font-medium text-sm">&lt; 1jt</Text>
+              <TouchableOpacity
+                onPress={() => setActiveFilter('< 1jt')}
+                className={`px-5 py-2.5 rounded-full mr-3 ${activeFilter === '< 1jt' ? 'bg-primary-container shadow-sm' : 'bg-surface-container-highest border border-outline-variant/20'}`}
+              >
+                <Text className={`text-sm ${activeFilter === '< 1jt' ? 'text-on-primary-container font-semibold' : 'text-on-surface-variant font-medium'}`}>&lt; 1jt</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="bg-surface-container-highest px-5 py-2.5 rounded-full mr-3 border border-outline-variant/20">
-                <Text className="text-on-surface-variant font-medium text-sm">AC</Text>
+              <TouchableOpacity
+                onPress={() => setActiveFilter('AC')}
+                className={`px-5 py-2.5 rounded-full mr-3 ${activeFilter === 'AC' ? 'bg-primary-container shadow-sm' : 'bg-surface-container-highest border border-outline-variant/20'}`}
+              >
+                <Text className={`text-sm ${activeFilter === 'AC' ? 'text-on-primary-container font-semibold' : 'text-on-surface-variant font-medium'}`}>AC</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="bg-surface-container-highest px-5 py-2.5 rounded-full mr-3 border border-outline-variant/20">
-                <Text className="text-on-surface-variant font-medium text-sm">KM Dalam</Text>
+              <TouchableOpacity
+                onPress={() => setActiveFilter('KM Dalam')}
+                className={`px-5 py-2.5 rounded-full mr-3 ${activeFilter === 'KM Dalam' ? 'bg-primary-container shadow-sm' : 'bg-surface-container-highest border border-outline-variant/20'}`}
+              >
+                <Text className={`text-sm ${activeFilter === 'KM Dalam' ? 'text-on-primary-container font-semibold' : 'text-on-surface-variant font-medium'}`}>KM Dalam</Text>
               </TouchableOpacity>
             </ScrollView>
-            
+
             {loading && (
               <ActivityIndicator size="large" color="#3525cd" className="mt-10" />
             )}
