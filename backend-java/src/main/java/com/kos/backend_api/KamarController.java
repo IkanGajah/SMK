@@ -1,4 +1,5 @@
 package com.kos.backend_api;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kos.backend_api.models.Kamar;
 import com.kos.backend_api.models.KamarDetailDTO;
 import com.kos.backend_api.models.WebResponse;
-import com.kos.backend_api.models.User;
 import com.kos.backend_api.models.AdminCabang;
 import com.kos.backend_api.models.enums.StatusKamar;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,7 +39,7 @@ public class KamarController {
     }
 
     @GetMapping("/{id}")
-    public WebResponse<KamarDetailDTO> getById(@PathVariable("id") Integer id) {
+    public WebResponse<KamarDetailDTO> getById(@PathVariable("id") int id) {
         Kamar kamar = kamarRepository.findById(id).orElse(null);
         if (kamar == null) {
             return new WebResponse<>(404, "Kamar tidak ditemukan", null);
@@ -66,12 +66,14 @@ public class KamarController {
 
     private void validateAdminCabangAccess(Integer kamarCabangId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) return;
-        
+        if (auth == null || !auth.isAuthenticated())
+            return;
+
         Object principal = auth.getPrincipal();
         if (principal instanceof AdminCabang admin) {
             if (admin.getCabang() == null || admin.getCabang().getIdCabang() != kamarCabangId) {
-                throw new AccessDeniedException("Akses Ditolak: Anda hanya berhak mengelola kamar di cabang Anda sendiri.");
+                throw new AccessDeniedException(
+                        "Akses Ditolak: Anda hanya berhak mengelola kamar di cabang Anda sendiri.");
             }
         }
     }
@@ -88,7 +90,7 @@ public class KamarController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    public WebResponse<Kamar> update(@PathVariable Integer id, @RequestBody Kamar request) {
+    public WebResponse<Kamar> update(@PathVariable int id, @RequestBody Kamar request) {
         return kamarRepository.findById(id).map(kamar -> {
             validateAdminCabangAccess(kamar.getCabang().getIdCabang());
             if (request.getCabang() != null) {
@@ -105,7 +107,7 @@ public class KamarController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    public WebResponse<String> delete(@PathVariable Integer id) {
+    public WebResponse<String> delete(@PathVariable int id) {
         return kamarRepository.findById(id).map(kamar -> {
             validateAdminCabangAccess(kamar.getCabang().getIdCabang());
             kamar.setStatusKetersediaan(StatusKamar.NONAKTIF);

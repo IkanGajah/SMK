@@ -19,7 +19,7 @@ public abstract class User implements UserDetails {
     protected int idUser;
 
 
-    @JsonIgnore
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     protected String password;
     
     protected String nama;
