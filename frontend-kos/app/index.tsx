@@ -26,7 +26,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState<boolean>(true);
 
   // Ganti berdasarkan IP laptop saat ini
-  const API_URL = 'http://10.1.13.53:8080/api/kamar'; 
+  const API_URL = `${API_BASE_URL}/api/kamar`;
 
   useEffect(() => {
     fetchKamar();
