@@ -1,18 +1,70 @@
-import React from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
   Image,
-  Platform,
+  ActivityIndicator,
   Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect } from 'expo-router';
+
+const API = 'http://10.1.13.53:8080';
 
 export default function AdminDashboardScreen() {
+  const [stats, setStats] = useState({ total: 0, available: 0, occupied: 0, tenants: 0 });
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [kamarRes, penyewaRes, transaksiRes] = await Promise.allSettled([
+        fetch(`${API}/api/kamar`),
+        fetch(`${API}/api/penyewa`),
+        fetch(`${API}/api/transaksi`),
+      ]);
+
+      let total = 0, available = 0, occupied = 0, tenants = 0;
+
+      if (kamarRes.status === 'fulfilled' && kamarRes.value.ok) {
+        const json = await kamarRes.value.json();
+        const rooms: any[] = json.data || [];
+        total = rooms.length;
+        available = rooms.filter((r: any) => r.status === 'Available' || r.status === 'Tersedia').length;
+        occupied = rooms.filter((r: any) => r.status === 'Occupied' || r.status === 'Penuh').length;
+      }
+
+      if (penyewaRes.status === 'fulfilled' && penyewaRes.value.ok) {
+        const json = await penyewaRes.value.json();
+        tenants = (json.data || []).length;
+      }
+
+      setStats({ total, available, occupied, tenants });
+
+      if (transaksiRes.status === 'fulfilled' && transaksiRes.value.ok) {
+        const json = await transaksiRes.value.json();
+        const data: any[] = json.data || [];
+        // Ambil 4 transaksi terbaru
+        setRecentActivity(data.slice(-4).reverse());
+      }
+    } catch (e) {
+      console.log('Dashboard fetch error', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      fetchDashboardData();
+    }, [])
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-surface pt-4" edges={['top', 'left', 'right']}>
       
@@ -48,13 +100,15 @@ export default function AdminDashboardScreen() {
 
         {/* Summary Cards */}
         <View className="flex-row flex-wrap justify-between gap-y-4 mb-8">
-          
+
           {/* Total Rooms */}
-          <View className="w-[48%] bg-surface-container-lowest rounded-xl p-5 shadow-sm relative overflow-hidden">
-            <View className="flex-row justify-between items-start z-10">
+          <View className="w-[48%] bg-surface-container-lowest rounded-xl p-5 shadow-sm">
+            <View className="flex-row justify-between items-start">
               <View>
-                <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Total Rooms</Text>
-                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">124</Text>
+                <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Total Kamar</Text>
+                {loading ? <ActivityIndicator size="small" color="#3525cd" /> : (
+                  <Text className="font-extrabold text-2xl text-on-surface tracking-tight">{stats.total}</Text>
+                )}
               </View>
               <View className="p-2 bg-[#e2dfff] rounded-lg">
                 <MaterialIcons name="apartment" size={20} color="#3525cd" />
@@ -63,11 +117,13 @@ export default function AdminDashboardScreen() {
           </View>
 
           {/* Available */}
-          <View className="w-[48%] bg-surface-container-lowest rounded-xl p-5 shadow-sm relative overflow-hidden">
-            <View className="flex-row justify-between items-start z-10">
+          <View className="w-[48%] bg-surface-container-lowest rounded-xl p-5 shadow-sm">
+            <View className="flex-row justify-between items-start">
               <View>
-                <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Available</Text>
-                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">18</Text>
+                <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Tersedia</Text>
+                {loading ? <ActivityIndicator size="small" color="#006b5f" /> : (
+                  <Text className="font-extrabold text-2xl text-on-surface tracking-tight">{stats.available}</Text>
+                )}
               </View>
               <View className="p-2 bg-[#6df5e1] rounded-lg">
                 <MaterialIcons name="vpn-key" size={20} color="#006b5f" />
@@ -76,11 +132,13 @@ export default function AdminDashboardScreen() {
           </View>
 
           {/* Occupied */}
-          <View className="w-[48%] bg-surface-container-lowest rounded-xl p-5 shadow-sm relative overflow-hidden">
-            <View className="flex-row justify-between items-start z-10">
+          <View className="w-[48%] bg-surface-container-lowest rounded-xl p-5 shadow-sm">
+            <View className="flex-row justify-between items-start">
               <View>
-                <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Occupied</Text>
-                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">106</Text>
+                <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Ditempati</Text>
+                {loading ? <ActivityIndicator size="small" color="#3d37a9" /> : (
+                  <Text className="font-extrabold text-2xl text-on-surface tracking-tight">{stats.occupied}</Text>
+                )}
               </View>
               <View className="p-2 bg-[#dbd7ff] rounded-lg">
                 <MaterialIcons name="meeting-room" size={20} color="#3d37a9" />
@@ -89,11 +147,13 @@ export default function AdminDashboardScreen() {
           </View>
 
           {/* Total Tenants */}
-          <View className="w-[48%] bg-surface-container-lowest rounded-xl p-5 shadow-sm relative overflow-hidden">
-            <View className="flex-row justify-between items-start z-10">
+          <View className="w-[48%] bg-surface-container-lowest rounded-xl p-5 shadow-sm">
+            <View className="flex-row justify-between items-start">
               <View>
-                <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Tenants</Text>
-                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">215</Text>
+                <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Penyewa</Text>
+                {loading ? <ActivityIndicator size="small" color="#3525cd" /> : (
+                  <Text className="font-extrabold text-2xl text-on-surface tracking-tight">{stats.tenants}</Text>
+                )}
               </View>
               <View className="p-2 bg-[#e2dfff] rounded-lg">
                 <MaterialIcons name="groups" size={20} color="#3525cd" />
@@ -123,60 +183,43 @@ export default function AdminDashboardScreen() {
 
         {/* Recent Activity */}
         <View className="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex-col gap-4">
-          <Text className="font-bold text-[20px] text-on-surface">Recent Activity</Text>
-          
+          <Text className="font-bold text-[20px] text-on-surface">Aktivitas Terkini</Text>
+
           <View className="flex-col gap-0">
-            {/* Item 1 */}
-            <View className="flex-row gap-4 py-4 border-b border-outline-variant/15">
-              <View className="w-10 h-10 rounded-full bg-secondary-container items-center justify-center">
-                <MaterialIcons name="payments" size={18} color="#006f64" />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text className="text-[14px] text-on-surface leading-snug">
-                  <Text className="font-bold">Sarah Jenkins</Text> paid rent for <Text className="font-bold">Apt 4B</Text>
-                </Text>
-                <Text className="text-[11px] text-on-surface-variant mt-0.5">2 hours ago</Text>
-              </View>
-            </View>
-
-            {/* Item 2 */}
-            <View className="flex-row gap-4 py-4 border-b border-outline-variant/15">
-              <View className="w-10 h-10 rounded-full bg-error-container items-center justify-center">
-                <MaterialIcons name="build" size={18} color="#93000a" />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text className="text-[14px] text-on-surface leading-snug">
-                  Maintenance request opened for <Text className="font-bold">Unit 12</Text>
-                </Text>
-                <Text className="text-[11px] text-on-surface-variant mt-0.5">5 hours ago</Text>
-              </View>
-            </View>
-
-            {/* Item 3 */}
-            <View className="flex-row gap-4 py-4 border-b border-outline-variant/15">
-              <View className="w-10 h-10 rounded-full bg-primary-container items-center justify-center">
-                <MaterialIcons name="person-add" size={18} color="#dad7ff" />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text className="text-[14px] text-on-surface leading-snug">
-                  New lease signed by <Text className="font-bold">Michael Chen</Text>
-                </Text>
-                <Text className="text-[11px] text-on-surface-variant mt-0.5">1 day ago</Text>
-              </View>
-            </View>
-
-            {/* Item 4 */}
-            <View className="flex-row gap-4 py-4">
-              <View className="w-10 h-10 rounded-full bg-surface-container-highest items-center justify-center">
-                <MaterialIcons name="mail" size={18} color="#191c1e" />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text className="text-[14px] text-on-surface leading-snug">
-                  Sent renewal notice to <Text className="font-bold">Apt 7A</Text>
-                </Text>
-                <Text className="text-[11px] text-on-surface-variant mt-0.5">2 days ago</Text>
-              </View>
-            </View>
+            {loading ? (
+              <ActivityIndicator size="large" color="#3525cd" className="py-6" />
+            ) : recentActivity.length > 0 ? (
+              recentActivity.map((trx: any, i: number) => (
+                <View key={trx.id || i} className={`flex-row gap-4 py-4 ${i < recentActivity.length - 1 ? 'border-b border-outline-variant/15' : ''}`}>
+                  <View className="w-10 h-10 rounded-full bg-secondary-container items-center justify-center">
+                    <MaterialIcons name="meeting-room" size={18} color="#006f64" />
+                  </View>
+                  <View className="flex-1 justify-center">
+                    <Text className="text-[14px] text-on-surface leading-snug">
+                      <Text className="font-bold">{trx.penyewa?.namaLengkap || 'Penyewa'}</Text>
+                      {' check-in ke kamar '}
+                      <Text className="font-bold">{trx.kamar?.nomorKamar || '-'}</Text>
+                    </Text>
+                    <Text className="text-[11px] text-on-surface-variant mt-0.5">
+                      {trx.tanggalMulaiSewa || 'Tanggal tidak diketahui'}
+                    </Text>
+                  </View>
+                </View>
+              ))
+            ) : (
+              // Fallback: data statis jika API transaksi kosong
+              <>
+                <View className="flex-row gap-4 py-4 border-b border-outline-variant/15">
+                  <View className="w-10 h-10 rounded-full bg-primary-container items-center justify-center">
+                    <MaterialIcons name="info" size={18} color="#dad7ff" />
+                  </View>
+                  <View className="flex-1 justify-center">
+                    <Text className="text-[14px] text-on-surface leading-snug">Belum ada transaksi tercatat.</Text>
+                    <Text className="text-[11px] text-on-surface-variant mt-0.5">Tambahkan kamar & penyewa untuk mulai.</Text>
+                  </View>
+                </View>
+              </>
+            )}
           </View>
         </View>
 
