@@ -78,7 +78,7 @@ export default function DetailKamarScreen() {
     );
   }
 
-  const isAvailable = kamar.status === 'Tersedia';
+  const isAvailable = kamar.status?.toUpperCase() === 'TERSEDIA';
 
   return (
     <View className="flex-1 bg-surface">
