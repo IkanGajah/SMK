@@ -70,6 +70,13 @@ public class TransaksiController {
                 .orElseThrow(() -> new RuntimeException("Data penyewa tidak ditemukan"));
         }
     
+        if (request.getTanggalTransaksi() == null) {
+            request.setTanggalTransaksi(java.time.LocalDate.now());
+        }
+        if (request.getJatuhTempo() == null) {
+            request.setJatuhTempo(request.getTanggalTransaksi().plusMonths(1));
+        }
+
         kamar.setStatusKetersediaan(StatusKamar.PENUH);
         kamarRepository.save(kamar);
 
