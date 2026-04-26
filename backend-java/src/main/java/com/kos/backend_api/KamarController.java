@@ -51,6 +51,7 @@ public class KamarController {
         dto.setFasilitas(kamar.getFasilitas() != null ? kamar.getFasilitas().name() : null);
         dto.setHarga(kamar.getHargaSewa());
         dto.setStatus(kamar.getStatusKetersediaan() != null ? kamar.getStatusKetersediaan().name() : null);
+        dto.setFoto(kamar.getFoto());
 
         if (StatusKamar.PENUH.equals(kamar.getStatusKetersediaan())) {
             var transaksiOpt = transaksiSewaRepository.findFirstByKamarIdKamarOrderByTanggalTransaksiDesc(id);
