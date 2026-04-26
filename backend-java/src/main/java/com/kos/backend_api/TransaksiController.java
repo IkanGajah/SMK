@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -114,5 +115,38 @@ public class TransaksiController {
         }
         
         return new WebResponse<>(200, "Daftar transaksi berhasil diambil", data);
+    }
+
+    @PutMapping("/{idTransaksi}/bayar-online")
+    @PreAuthorize("hasRole('PENYEWA')")
+    public WebResponse<TransaksiSewa> bayarOnline(@PathVariable int idTransaksi) {
+        TransaksiSewa transaksi = transaksiRepository.findById(idTransaksi)
+                .orElseThrow(() -> new RuntimeException("Data transaksi tidak ditemukan"));
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        if (transaksi.getPenyewa().getIdUser() != user.getIdUser()) {
+            throw new AccessDeniedException("Akses Ditolak: Ini bukan transaksi Anda.");
+        }
+
+        transaksi.setStatusBayar(com.kos.backend_api.models.enums.StatusBayar.LUNAS);
+        transaksiRepository.save(transaksi);
+
+        return new WebResponse<>(200, "Pembayaran online berhasil (MOCK)", transaksi);
+    }
+
+    @PutMapping("/{idTransaksi}/konfirmasi-manual")
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public WebResponse<TransaksiSewa> konfirmasiManual(@PathVariable int idTransaksi) {
+        TransaksiSewa transaksi = transaksiRepository.findById(idTransaksi)
+                .orElseThrow(() -> new RuntimeException("Data transaksi tidak ditemukan"));
+
+        validateAdminCabangAccess(transaksi.getKamar().getCabang().getIdCabang());
+
+        transaksi.setStatusBayar(com.kos.backend_api.models.enums.StatusBayar.LUNAS);
+        transaksiRepository.save(transaksi);
+
+        return new WebResponse<>(200, "Pembayaran manual berhasil dikonfirmasi", transaksi);
     }
 }
