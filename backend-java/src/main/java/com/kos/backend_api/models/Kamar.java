@@ -30,14 +30,17 @@ public class Kamar {
     @JsonProperty("status")
     private StatusKamar statusKetersediaan; 
 
+    private String foto;
+
     public Kamar() {}
 
-    public Kamar(CabangKos cabang, String nomorKamar, FasilitasKamar fasilitas, int hargaSewa, StatusKamar statusKetersediaan) {
+    public Kamar(CabangKos cabang, String nomorKamar, FasilitasKamar fasilitas, int hargaSewa, StatusKamar statusKetersediaan, String foto) {
         this.cabang = cabang;
         this.nomorKamar = nomorKamar;
         this.fasilitas = fasilitas;
         this.hargaSewa = hargaSewa;
         this.statusKetersediaan = statusKetersediaan;
+        this.foto = foto;
     }
 
     public int getIdKamar() { return idKamar; }
@@ -57,4 +60,7 @@ public class Kamar {
 
     public StatusKamar getStatusKetersediaan() { return statusKetersediaan; }
     public void setStatusKetersediaan(StatusKamar statusKetersediaan) { this.statusKetersediaan = statusKetersediaan; }
+
+    public String getFoto() { return foto; }
+    public void setFoto(String foto) { this.foto = foto; }
 }

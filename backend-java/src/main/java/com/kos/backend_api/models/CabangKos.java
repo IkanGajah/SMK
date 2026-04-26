@@ -13,6 +13,7 @@ public class CabangKos {
     private String namaCabang;
     private String alamat;
     private int jumlahKamar;
+    private String status = "Aktif"; // Aktif, Nonaktif
 
     public CabangKos() {}
 
@@ -33,4 +34,7 @@ public class CabangKos {
 
     public int getJumlahKamar() { return jumlahKamar; }
     public void setJumlahKamar(int jumlahKamar) { this.jumlahKamar = jumlahKamar; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

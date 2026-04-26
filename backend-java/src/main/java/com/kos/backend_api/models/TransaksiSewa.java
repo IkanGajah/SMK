@@ -30,15 +30,18 @@ public class TransaksiSewa {
     @Enumerated(EnumType.STRING)
     private StatusBayar statusBayar; 
 
+    private LocalDate jatuhTempo;
+
     public TransaksiSewa() {}
 
-    public TransaksiSewa(Penyewa penyewa, Kamar kamar, LocalDate tanggalTransaksi, int nominal, MetodePembayaran metodePembayaran, StatusBayar statusBayar) {
+    public TransaksiSewa(Penyewa penyewa, Kamar kamar, LocalDate tanggalTransaksi, int nominal, MetodePembayaran metodePembayaran, StatusBayar statusBayar, LocalDate jatuhTempo) {
         this.penyewa = penyewa;
         this.kamar = kamar;
         this.tanggalTransaksi = tanggalTransaksi;
         this.nominal = nominal;
         this.metodePembayaran = metodePembayaran;
         this.statusBayar = statusBayar;
+        this.jatuhTempo = jatuhTempo;
     }
 
     public int getIdTransaksi() { return idTransaksi; }
@@ -61,4 +64,7 @@ public class TransaksiSewa {
 
     public StatusBayar getStatusBayar() { return statusBayar; }
     public void setStatusBayar(StatusBayar statusBayar) { this.statusBayar = statusBayar; }
+
+    public LocalDate getJatuhTempo() { return jatuhTempo; }
+    public void setJatuhTempo(LocalDate jatuhTempo) { this.jatuhTempo = jatuhTempo; }
 }
