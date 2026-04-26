@@ -1,16 +1,17 @@
 package com.kos.backend_api;
 
-import com.kos.backend_api.models.Kamar;
-import com.kos.backend_api.models.TransaksiSewa;
-import com.kos.backend_api.models.enums.StatusBayar;
-import com.kos.backend_api.models.enums.StatusKamar;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import com.kos.backend_api.models.Kamar;
+import com.kos.backend_api.models.TransaksiSewa;
+import com.kos.backend_api.models.enums.StatusBayar;
+import com.kos.backend_api.models.enums.StatusKamar;
 
 @Component
 public class BillingScheduler {
@@ -44,11 +45,11 @@ public class BillingScheduler {
 
                 // 3. Cek apakah jatuh temponya adalah tepat 7 hari lagi
                 if (jatuhTempo != null && jatuhTempo.isEqual(hPlus7)) {
-                    // MOCK NOTIFIKASI (FR-024)
+                    // MOCK NOTIFIKASI 
                     System.out.println("NOTIFIKASI: Tagihan untuk penyewa " + terakhir.getPenyewa().getNama() + 
                                        " di kamar " + kamar.getNomorKamar() + " jatuh tempo pada " + jatuhTempo + ".");
 
-                    // GENERATE TAGIHAN BARU BULAN DEPAN (FR-023)
+                    // GENERATE TAGIHAN BARU BULAN DEPAN
                     TransaksiSewa tagihanBaru = new TransaksiSewa();
                     tagihanBaru.setKamar(kamar);
                     tagihanBaru.setPenyewa(terakhir.getPenyewa());
