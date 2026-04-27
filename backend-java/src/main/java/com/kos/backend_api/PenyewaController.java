@@ -51,6 +51,18 @@ public class PenyewaController {
         return new WebResponse<>(201, "Penyewa berhasil didaftarkan secara manual", baru);
     }
 
+    @GetMapping("/profil")
+    @PreAuthorize("hasRole('PENYEWA')")
+    public WebResponse<Penyewa> getProfil() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        Penyewa penyewa = penyewaRepository.findById(user.getIdUser())
+            .orElseThrow(() -> new RuntimeException("Data penyewa tidak ditemukan"));
+        
+        return new WebResponse<>(200, "Profil berhasil diambil", penyewa);
+    }
+
     @org.springframework.web.bind.annotation.PutMapping("/profil")
     @PreAuthorize("hasRole('PENYEWA')")
     public WebResponse<Penyewa> updateProfil(@RequestBody Penyewa request) {
