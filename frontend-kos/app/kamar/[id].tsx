@@ -14,23 +14,21 @@ const MOCK_IMAGES = [
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCK2USxE6VKzFXonzNOEaHTH8iZU7qchm9dLjLzUrM1nklP-nfTP_77QS8m23MIdMWGWdpAkpYz-sLdXfgftrXrvHA-G_7P7Y5YPk65QL_0rE6GixEK4zknpSOgSpjaXyjFiyn7d6rOvjF4nqa1tuc1YBLl0DM3pXRPluGaU4HjSMf2IjKW_tHWCQ1jgiCQdhruHGE9Ev9w8o0oz9ovtoeaQkn9Ce_BlMmpdoOyEiN87XNLkX2U64hEkOKAxWhsZVJorS0j7_TM4W0"
 ];
 export default function DetailKamarScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, guest } = useLocalSearchParams();
   const router = useRouter();
   
   const [kamar, setKamar] = useState<Kamar | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  const FALLBACK_DATA: Kamar = {
-    id: Number(id) || 1,
-    nomorKamar: id ? String(id) : "101",
-    status: "Tersedia",
-    fasilitas: "AC, WiFi, K. Mandi Dalam, Kasur Springbed, Lemari Pakaian, Meja Belajar",
-    harga: 1200000,
-  };
+  const FALLBACK_LIST: Kamar[] = [
+    { id: 1, nomorKamar: "101", status: "Tersedia", fasilitas: "AC, WiFi, KM Dalam, Lemari, Meja Belajar, Kasur Queen Size", harga: 1200000 },
+    { id: 2, nomorKamar: "102", status: "Tersedia", fasilitas: "Kipas Angin, KM Luar, Lemari, Meja Belajar", harga: 800000 },
+    { id: 3, nomorKamar: "201", status: "Penuh", fasilitas: "AC, WiFi, KM Dalam, Balkon Pribadi", harga: 1500000 },
+  ];
 
   const API_URL = `${API_BASE_URL}/kamar/${id}`; 
-
+  
   useEffect(() => {
     fetchDetailKamar();
   }, [id]);
@@ -42,11 +40,13 @@ export default function DetailKamarScreen() {
       if (json.data) {
         setKamar(json.data);
       } else {
-        setKamar(FALLBACK_DATA);
+        const dummy = FALLBACK_LIST.find(k => k.id === Number(id)) || FALLBACK_LIST[0];
+        setKamar(dummy);
       }
     } catch (error) {
       console.error(error);
-      setKamar(FALLBACK_DATA);
+      const dummy = FALLBACK_LIST.find(k => k.id === Number(id)) || FALLBACK_LIST[0];
+      setKamar(dummy);
     } finally {
       setLoading(false);
     }
@@ -79,6 +79,21 @@ export default function DetailKamarScreen() {
   }
 
   const isAvailable = kamar.status?.toUpperCase() === 'TERSEDIA';
+
+  const handleSewa = () => {
+    if (guest === 'true') {
+      import('react-native').then(({ Alert }) => {
+        Alert.alert("Belum Login", "Anda harus login terlebih dahulu untuk menyewa kamar.", [
+          { text: "Batal", style: "cancel" },
+          { text: "Login", onPress: () => router.push('/login') }
+        ]);
+      });
+    } else {
+      import('react-native').then(({ Alert }) => {
+        Alert.alert("Berhasil", "Permintaan sewa Anda telah dikirim!");
+      });
+    }
+  };
 
   return (
     <View className="flex-1 bg-surface">
@@ -230,6 +245,7 @@ export default function DetailKamarScreen() {
         style={Platform.OS === 'android' ? { elevation: 8 } : { shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.05, shadowRadius: 12 }}
       >
         <TouchableOpacity 
+          onPress={handleSewa}
           className={`w-full h-14 rounded-xl flex-row items-center justify-center gap-2 active:scale-95 ${isAvailable ? 'bg-primary' : 'bg-surface-variant'}`}
           disabled={!isAvailable}
         >
