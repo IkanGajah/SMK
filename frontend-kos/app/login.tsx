@@ -41,9 +41,12 @@ export default function LoginScreen() {
       
       const responseData = await response.json();
       
-      if (response.ok && responseData.data) {
+        if (response.ok && responseData.data) {
         const role = responseData.data.role;
-        // Simpan token di sini jika perlu: responseData.data.token
+        const globalState = require('./globalState').globalState;
+        globalState.email = email;
+        globalState.token = responseData.data.token || '';
+        globalState.role = role;
         
         if (role === 'ROLE_OWNER') {
           router.replace('/(owner)' as any);
@@ -176,7 +179,7 @@ export default function LoginScreen() {
                 {/* Register Link */}
                 <View className="mt-8 flex-row justify-center items-center">
                   <Text className="text-sm text-on-surface-variant">Belum punya akun? </Text>
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push('/register' as any)}>
                     <Text className="font-bold text-primary">Daftar di sini</Text>
                   </TouchableOpacity>
                 </View>

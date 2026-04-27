@@ -57,7 +57,7 @@ export default function HomeScreen() {
 
     return (
       <TouchableOpacity
-        onPress={() => router.push(`/kamar/${item.id}` as any)}
+        onPress={() => router.push(`/kamar/${item.id}?guest=true` as any)}
         activeOpacity={0.8}
         className={`bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/30 shadow-sm mb-6 mx-4 ${!isAvailable ? 'opacity-80' : ''}`}
         style={
