@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-import { globalState } from '../globalState';
+import { globalState } from '../_globalState';
 
 export default function ProfileScreen() {
   const router = useRouter();

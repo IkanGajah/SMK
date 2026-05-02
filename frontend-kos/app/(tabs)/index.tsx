@@ -15,7 +15,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { API_BASE_URL } from '@/constants/config';
 import { Kamar } from '@/types/types';
-import { globalState } from '../globalState';
+import { globalState } from '../_globalState';
 
 const { width } = Dimensions.get('window');
 
