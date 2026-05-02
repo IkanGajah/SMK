@@ -1,5 +1,5 @@
 export const globalState = {
-  email: 'Budi Santoso',
+  email: '',
   token: '',
   role: ''
 };
