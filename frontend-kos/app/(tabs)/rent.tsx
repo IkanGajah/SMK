@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { API_BASE_URL } from '@/constants/config';
-import { globalState } from '../globalState';
+import { globalState } from '../_globalState';
 
 // Data Dummy My Rent
 const RENT_DATA = [
