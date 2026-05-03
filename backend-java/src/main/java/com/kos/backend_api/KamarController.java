@@ -38,6 +38,12 @@ public class KamarController {
         return new WebResponse<>(200, "Berhasil mengambil data kamar", data);
     }
 
+    @GetMapping("/cabang/{cabangId}")
+    public WebResponse<List<Kamar>> getByCabang(@PathVariable("cabangId") int cabangId) {
+        List<Kamar> data = kamarRepository.findByCabangIdCabangAndStatusKetersediaanNot(cabangId, StatusKamar.NONAKTIF);
+        return new WebResponse<>(200, "Berhasil mengambil data kamar di cabang ini", data);
+    }
+
     @GetMapping("/{id}")
     public WebResponse<KamarDetailDTO> getById(@PathVariable("id") int id) {
         Kamar kamar = kamarRepository.findById(id).orElse(null);
