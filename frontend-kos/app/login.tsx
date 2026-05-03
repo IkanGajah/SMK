@@ -193,7 +193,7 @@ export default function LoginScreen() {
             <View className="mt-8 flex-row justify-center">
               <TouchableOpacity
                 className="flex-row items-center gap-2"
-                onPress={() => router.back()}
+                onPress={() => router.replace('/' as any)}
               >
                 <MaterialIcons name="arrow-back" size={16} color="rgba(255,255,255,0.8)" />
                 <Text className="text-sm font-medium text-white/80">Lihat Katalog</Text>

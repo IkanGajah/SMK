@@ -36,6 +36,12 @@ export default function GuestHomeScreen() {
     fetchInitialData();
   }, []);
 
+  // Re-fetch kamar saat cabang dipilih atau di-reset
+  useEffect(() => {
+    const branchId = selectedBranch ? (selectedBranch.idCabang || selectedBranch.id) : undefined;
+    fetchKamar(branchId);
+  }, [selectedBranch]);
+
   const fetchInitialData = async () => {
     setLoading(true);
     await fetchBranches();
