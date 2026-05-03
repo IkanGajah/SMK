@@ -29,31 +29,50 @@ export default function GuestHomeScreen() {
   const [branches, setBranches] = useState<any[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [branchesLoading, setBranchesLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('Semua');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     fetchInitialData();
   }, []);
 
+  // Re-fetch kamar saat cabang dipilih atau di-reset (skip saat initial load)
+  useEffect(() => {
+    if (isInitialLoad) return;
+    const branchId = selectedBranch ? (selectedBranch.idCabang || selectedBranch.id) : undefined;
+    fetchKamar(branchId);
+  }, [selectedBranch]);
+
   const fetchInitialData = async () => {
     setLoading(true);
+    setBranchesLoading(true);
     await fetchBranches();
     await fetchKamar();
+    setIsInitialLoad(false);
     setLoading(false);
   };
 
   const fetchBranches = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/cabang`);
+      console.log("[Cabang] HTTP Status:", response.status);
+      if (!response.ok) {
+        console.error("[Cabang] Gagal fetch, status:", response.status);
+        return;
+      }
       const text = await response.text();
       if (!text || text.trim() === "") return;
-      
       const json = JSON.parse(text);
-      console.log("Data Cabang Guest:", json);
-      if (json.data) setBranches(json.data);
+      console.log("[Cabang] Data:", json);
+      if (json.data && Array.isArray(json.data)) {
+        setBranches(json.data);
+      }
     } catch (e) {
-      console.error("Error fetching branches:", e);
+      console.error("[Cabang] Error:", e);
+    } finally {
+      setBranchesLoading(false);
     }
   };
 
@@ -65,11 +84,11 @@ export default function GuestHomeScreen() {
       if (!text || text.trim() === "") return;
 
       const json = JSON.parse(text);
-      if (json.data) {
+      if (json.data && Array.isArray(json.data)) {
         setKamar(json.data);
       }
     } catch (error) {
-      console.error("Error fetching kamar:", error);
+      console.error("[Kamar] Error:", error);
     }
   };
 
@@ -176,43 +195,64 @@ export default function GuestHomeScreen() {
                 </TouchableOpacity>
               )}
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingRight: 20 }}>
-              {branches.map((branch, index) => {
-                const bId = branch.idCabang || branch.id;
-                const isSelected = selectedBranch && (selectedBranch.idCabang || selectedBranch.id) === bId;
-                
-                const availableCount = kamar.filter(k => 
-                  (k.cabang?.idCabang === bId || k.cabang?.id === bId) && 
-                  (k.status || k.statusKetersediaan) === 'TERSEDIA'
-                ).length;
 
-                return (
-                <TouchableOpacity
-                  key={bId || index}
-                  onPress={() => handleBranchSelect(branch)}
-                  className={`w-40 bg-surface-container-low rounded-2xl overflow-hidden border ${isSelected ? 'border-primary' : 'border-outline-variant/10'}`}
-                >
-                  <View className="h-24 bg-surface-container-high relative">
-                    <Image
-                      source={{ uri: branch.foto || MOCK_IMAGES[index % MOCK_IMAGES.length] }}
-                      className="w-full h-full"
-                    />
-                    <View className="absolute inset-0 bg-black/10" />
-                    <View className="absolute top-2 left-2 px-2 py-1 bg-error-container rounded-full flex-row items-center">
-                      <Text className="text-on-error-container text-[10px] font-bold">Sisa {availableCount} Kamar</Text>
+            {branchesLoading ? (
+              // Skeleton loading untuk cabang
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingRight: 20 }}>
+                {[1, 2, 3].map((i) => (
+                  <View key={i} className="w-40 bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/10">
+                    <View className="h-24 bg-surface-container-high" />
+                    <View className="p-3 gap-2">
+                      <View className="h-3 bg-surface-container-high rounded w-3/4" />
+                      <View className="h-2 bg-surface-container-high rounded w-1/2" />
                     </View>
                   </View>
-                  <View className="p-3">
-                    <Text className="font-bold text-on-surface text-sm" numberOfLines={1}>{branch.namaCabang}</Text>
-                    <View className="flex-row items-center gap-1 mt-1">
-                      <MaterialIcons name="location-on" size={12} color="#777587" />
-                      <Text className="text-[10px] text-outline flex-1" numberOfLines={1}>{branch.alamat}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+                ))}
+              </ScrollView>
+            ) : branches.length === 0 ? (
+              // Fallback jika API cabang tidak bisa diakses
+              <View className="py-4 px-2">
+                <Text className="text-outline text-sm">Data cabang tidak tersedia saat ini.</Text>
+              </View>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingRight: 20 }}>
+                {branches.map((branch, index) => {
+                  const bId = branch.idCabang || branch.id;
+                  const isSelected = selectedBranch && (selectedBranch.idCabang || selectedBranch.id) === bId;
+                  
+                  const availableCount = kamar.filter(k => 
+                    (k.cabang?.idCabang === bId || k.cabang?.id === bId) && 
+                    (k.status || k.statusKetersediaan) === 'TERSEDIA'
+                  ).length;
+
+                  return (
+                    <TouchableOpacity
+                      key={bId || index}
+                      onPress={() => handleBranchSelect(branch)}
+                      className={`w-40 bg-surface-container-low rounded-2xl overflow-hidden border ${isSelected ? 'border-primary' : 'border-outline-variant/10'}`}
+                    >
+                      <View className="h-24 bg-surface-container-high relative">
+                        <Image
+                          source={{ uri: branch.foto || MOCK_IMAGES[index % MOCK_IMAGES.length] }}
+                          className="w-full h-full"
+                        />
+                        <View className="absolute inset-0 bg-black/10" />
+                        <View className="absolute top-2 left-2 px-2 py-1 bg-error-container rounded-full flex-row items-center">
+                          <Text className="text-on-error-container text-[10px] font-bold">Sisa {availableCount} Kamar</Text>
+                        </View>
+                      </View>
+                      <View className="p-3">
+                        <Text className="font-bold text-on-surface text-sm" numberOfLines={1}>{branch.namaCabang}</Text>
+                        <View className="flex-row items-center gap-1 mt-1">
+                          <MaterialIcons name="location-on" size={12} color="#777587" />
+                          <Text className="text-[10px] text-outline flex-1" numberOfLines={1}>{branch.alamat}</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            )}
           </View>
 
           {/* Chips */}
@@ -302,39 +342,50 @@ export default function GuestHomeScreen() {
               </View>
             )}
 
-            <View className="mt-8 px-4">
-              <Text className="font-bold text-[22px] text-on-surface mb-5 px-2">Jelajahi Kamar</Text>
-              <View className="flex-row flex-wrap justify-between">
-                {JELAJAHI.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    onPress={() => router.push(`/kamar/${item.id}?guest=true` as any)}
-                    className="w-[48%] bg-surface-container-lowest rounded-3xl overflow-hidden mb-6 shadow-sm border border-outline-variant/10"
-                  >
-                    <View className="h-40 relative">
-                      <Image source={{ uri: item.image }} className="w-full h-full" resizeMode="cover" />
-                      <View className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 items-center justify-center">
-                        <MaterialIcons name="favorite-border" size={18} color="#1b1b1f" />
-                      </View>
-                    </View>
-                    <View className="p-4">
-                      <Text className="font-bold text-base text-on-surface mb-1" numberOfLines={1}>{item.name}</Text>
-                      <View className="flex-row items-center gap-1 mb-3">
-                        <MaterialIcons name="location-on" size={14} color="#777587" />
-                        <Text className="text-xs text-outline flex-1" numberOfLines={1}>{item.location}</Text>
-                      </View>
-                      <View className="flex-row justify-between items-center">
-                        <Text className="text-primary font-black text-base">{item.price}</Text>
-                        <View className="flex-row items-center gap-1">
-                          <MaterialIcons name="star" size={14} color="#3525cd" />
-                          <Text className="text-xs font-bold text-on-surface">{item.rating}</Text>
+            {JELAJAHI.length > 0 && (
+              <View className="mt-8 px-4">
+                <Text className="font-bold text-[22px] text-on-surface mb-5 px-2">Jelajahi Kamar</Text>
+                <View className="flex-row flex-wrap justify-between">
+                  {JELAJAHI.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      onPress={() => router.push(`/kamar/${item.id}?guest=true` as any)}
+                      className="w-[48%] bg-surface-container-lowest rounded-3xl overflow-hidden mb-6 shadow-sm border border-outline-variant/10"
+                    >
+                      <View className="h-40 relative">
+                        <Image source={{ uri: item.image }} className="w-full h-full" resizeMode="cover" />
+                        <View className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 items-center justify-center">
+                          <MaterialIcons name="favorite-border" size={18} color="#1b1b1f" />
                         </View>
                       </View>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+                      <View className="p-4">
+                        <Text className="font-bold text-base text-on-surface mb-1" numberOfLines={1}>{item.name}</Text>
+                        <View className="flex-row items-center gap-1 mb-3">
+                          <MaterialIcons name="location-on" size={14} color="#777587" />
+                          <Text className="text-xs text-outline flex-1" numberOfLines={1}>{item.location}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center">
+                          <Text className="text-primary font-black text-base">{item.price}</Text>
+                          <View className="flex-row items-center gap-1">
+                            <MaterialIcons name="star" size={14} color="#3525cd" />
+                            <Text className="text-xs font-bold text-on-surface">{item.rating}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
+            )}
+
+            {/* Empty State */}
+            {filteredKamar.length === 0 && (
+              <View className="mt-16 px-6 items-center justify-center">
+                <MaterialIcons name="event-busy" size={64} color="#777587" />
+                <Text className="mt-4 text-lg font-bold text-on-surface text-center">Belum Ada Kamar</Text>
+                <Text className="mt-2 text-sm text-on-surface-variant text-center">Data kamar kosong.</Text>
+              </View>
+            )}
           </>
         )}
       </ScrollView>

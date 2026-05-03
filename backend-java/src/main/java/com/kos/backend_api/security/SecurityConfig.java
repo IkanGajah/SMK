@@ -57,6 +57,7 @@ public class SecurityConfig {
                 // Rute Publik (Tanpa Token)
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/kamar/**").permitAll() // Sesuai FR-016: Katalog publik
+                .requestMatchers("/api/cabang/**").permitAll() // Sesuai permintaan guest dapat memilih cabang
                 // Rute Wajib Login
                 .anyRequest().authenticated()
             );

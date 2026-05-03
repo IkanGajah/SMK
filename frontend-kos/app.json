@@ -1,17 +1,23 @@
 {
   "expo": {
-    "name": "frontend-kos",
-    "slug": "frontend-kos",
-    "version": "1.0.0",
+    "name": "sistem-manajemen-kos",
+    "slug": "sistem-manajemen-kos",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "frontendkos",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rafifajri.manajemenkos",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.rafifajri.manajemenkos",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -43,6 +49,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "daa36fbf-e403-464c-bae1-d41a5aa90011"
+      }
     }
   }
 }
