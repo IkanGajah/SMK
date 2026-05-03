@@ -29,37 +29,50 @@ export default function GuestHomeScreen() {
   const [branches, setBranches] = useState<any[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [branchesLoading, setBranchesLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('Semua');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     fetchInitialData();
   }, []);
 
-  // Re-fetch kamar saat cabang dipilih atau di-reset
+  // Re-fetch kamar saat cabang dipilih atau di-reset (skip saat initial load)
   useEffect(() => {
+    if (isInitialLoad) return;
     const branchId = selectedBranch ? (selectedBranch.idCabang || selectedBranch.id) : undefined;
     fetchKamar(branchId);
   }, [selectedBranch]);
 
   const fetchInitialData = async () => {
     setLoading(true);
+    setBranchesLoading(true);
     await fetchBranches();
     await fetchKamar();
+    setIsInitialLoad(false);
     setLoading(false);
   };
 
   const fetchBranches = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/cabang`);
+      console.log("[Cabang] HTTP Status:", response.status);
+      if (!response.ok) {
+        console.error("[Cabang] Gagal fetch, status:", response.status);
+        return;
+      }
       const text = await response.text();
       if (!text || text.trim() === "") return;
-      
       const json = JSON.parse(text);
-      console.log("Data Cabang Guest:", json);
-      if (json.data) setBranches(json.data);
+      console.log("[Cabang] Data:", json);
+      if (json.data && Array.isArray(json.data)) {
+        setBranches(json.data);
+      }
     } catch (e) {
-      console.error("Error fetching branches:", e);
+      console.error("[Cabang] Error:", e);
+    } finally {
+      setBranchesLoading(false);
     }
   };
 
@@ -71,11 +84,11 @@ export default function GuestHomeScreen() {
       if (!text || text.trim() === "") return;
 
       const json = JSON.parse(text);
-      if (json.data) {
+      if (json.data && Array.isArray(json.data)) {
         setKamar(json.data);
       }
     } catch (error) {
-      console.error("Error fetching kamar:", error);
+      console.error("[Kamar] Error:", error);
     }
   };
 
@@ -182,43 +195,64 @@ export default function GuestHomeScreen() {
                 </TouchableOpacity>
               )}
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingRight: 20 }}>
-              {branches.map((branch, index) => {
-                const bId = branch.idCabang || branch.id;
-                const isSelected = selectedBranch && (selectedBranch.idCabang || selectedBranch.id) === bId;
-                
-                const availableCount = kamar.filter(k => 
-                  (k.cabang?.idCabang === bId || k.cabang?.id === bId) && 
-                  (k.status || k.statusKetersediaan) === 'TERSEDIA'
-                ).length;
 
-                return (
-                <TouchableOpacity
-                  key={bId || index}
-                  onPress={() => handleBranchSelect(branch)}
-                  className={`w-40 bg-surface-container-low rounded-2xl overflow-hidden border ${isSelected ? 'border-primary' : 'border-outline-variant/10'}`}
-                >
-                  <View className="h-24 bg-surface-container-high relative">
-                    <Image
-                      source={{ uri: branch.foto || MOCK_IMAGES[index % MOCK_IMAGES.length] }}
-                      className="w-full h-full"
-                    />
-                    <View className="absolute inset-0 bg-black/10" />
-                    <View className="absolute top-2 left-2 px-2 py-1 bg-error-container rounded-full flex-row items-center">
-                      <Text className="text-on-error-container text-[10px] font-bold">Sisa {availableCount} Kamar</Text>
+            {branchesLoading ? (
+              // Skeleton loading untuk cabang
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingRight: 20 }}>
+                {[1, 2, 3].map((i) => (
+                  <View key={i} className="w-40 bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/10">
+                    <View className="h-24 bg-surface-container-high" />
+                    <View className="p-3 gap-2">
+                      <View className="h-3 bg-surface-container-high rounded w-3/4" />
+                      <View className="h-2 bg-surface-container-high rounded w-1/2" />
                     </View>
                   </View>
-                  <View className="p-3">
-                    <Text className="font-bold text-on-surface text-sm" numberOfLines={1}>{branch.namaCabang}</Text>
-                    <View className="flex-row items-center gap-1 mt-1">
-                      <MaterialIcons name="location-on" size={12} color="#777587" />
-                      <Text className="text-[10px] text-outline flex-1" numberOfLines={1}>{branch.alamat}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+                ))}
+              </ScrollView>
+            ) : branches.length === 0 ? (
+              // Fallback jika API cabang tidak bisa diakses
+              <View className="py-4 px-2">
+                <Text className="text-outline text-sm">Data cabang tidak tersedia saat ini.</Text>
+              </View>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingRight: 20 }}>
+                {branches.map((branch, index) => {
+                  const bId = branch.idCabang || branch.id;
+                  const isSelected = selectedBranch && (selectedBranch.idCabang || selectedBranch.id) === bId;
+                  
+                  const availableCount = kamar.filter(k => 
+                    (k.cabang?.idCabang === bId || k.cabang?.id === bId) && 
+                    (k.status || k.statusKetersediaan) === 'TERSEDIA'
+                  ).length;
+
+                  return (
+                    <TouchableOpacity
+                      key={bId || index}
+                      onPress={() => handleBranchSelect(branch)}
+                      className={`w-40 bg-surface-container-low rounded-2xl overflow-hidden border ${isSelected ? 'border-primary' : 'border-outline-variant/10'}`}
+                    >
+                      <View className="h-24 bg-surface-container-high relative">
+                        <Image
+                          source={{ uri: branch.foto || MOCK_IMAGES[index % MOCK_IMAGES.length] }}
+                          className="w-full h-full"
+                        />
+                        <View className="absolute inset-0 bg-black/10" />
+                        <View className="absolute top-2 left-2 px-2 py-1 bg-error-container rounded-full flex-row items-center">
+                          <Text className="text-on-error-container text-[10px] font-bold">Sisa {availableCount} Kamar</Text>
+                        </View>
+                      </View>
+                      <View className="p-3">
+                        <Text className="font-bold text-on-surface text-sm" numberOfLines={1}>{branch.namaCabang}</Text>
+                        <View className="flex-row items-center gap-1 mt-1">
+                          <MaterialIcons name="location-on" size={12} color="#777587" />
+                          <Text className="text-[10px] text-outline flex-1" numberOfLines={1}>{branch.alamat}</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            )}
           </View>
 
           {/* Chips */}
