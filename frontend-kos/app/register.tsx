@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Text, 
-  View, 
-  TextInput, 
-  TouchableOpacity, 
-  KeyboardAvoidingView, 
+import {
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   ActivityIndicator,
@@ -18,14 +18,14 @@ import { API_BASE_URL } from '@/constants/config';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  
+
   const [nama, setNama] = useState('');
   const [email, setEmail] = useState('');
   const [noTelepon, setNoTelepon] = useState('');
   const [noKtp, setNoKtp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +44,14 @@ export default function RegisterScreen() {
       Alert.alert("Error", "Password minimal 8 karakter!");
       return;
     }
+    if (noTelepon.length < 11 || noTelepon.length > 13) {
+      Alert.alert("Error", "Nomor telepon harus antara 11-13 digit!");
+      return;
+    }
+    if (noKtp.length !== 16) {
+      Alert.alert("Error", "Nomor KTP harus 16 digit!");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -53,16 +61,16 @@ export default function RegisterScreen() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nama, email, noTelepon, password, noKtp })
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         Alert.alert("Sukses", "Akun berhasil dibuat! Silakan login.");
         router.replace('/login');
       } else {
         Alert.alert("Registrasi Gagal", data.message || "Gagal membuat akun");
       }
-      
+
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Gagal menghubungi server");
@@ -80,7 +88,7 @@ export default function RegisterScreen() {
         end={{ x: 1, y: 1 }}
         className="absolute inset-0 w-full h-full"
       />
-      
+
       {/* Ambient Blobs (Simplified for React Native) */}
       <View className="absolute inset-0 overflow-hidden opacity-30">
         <View className="absolute -top-20 -left-10 w-64 h-64 rounded-full bg-[#6df5e1] opacity-40 blur-3xl" />
@@ -88,17 +96,17 @@ export default function RegisterScreen() {
       </View>
 
       <SafeAreaView className="flex-1">
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           className="flex-1"
         >
-          <ScrollView 
+          <ScrollView
             contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 16 }}
             showsVerticalScrollIndicator={false}
           >
-            
+
             {/* Registration Card */}
-            <View 
+            <View
               className="rounded-2xl p-6 sm:p-8 border border-white/10 shadow-xl mx-auto w-full max-w-md"
               style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)' }}
             >
@@ -113,7 +121,7 @@ export default function RegisterScreen() {
               </View>
 
               <View className="space-y-5">
-                
+
                 {/* Nama Lengkap Field */}
                 <View className="mb-4">
                   <Text className="text-sm font-medium text-on-surface-variant ml-1 mb-2">Nama Lengkap</Text>
@@ -162,8 +170,9 @@ export default function RegisterScreen() {
                       placeholder="Masukkan 16 digit NIK"
                       placeholderTextColor="#777587"
                       keyboardType="number-pad"
+                      maxLength={16}
                       value={noKtp}
-                      onChangeText={setNoKtp}
+                      onChangeText={(text) => setNoKtp(text.replace(/[^0-9]/g, ''))}
                     />
                   </View>
                 </View>
@@ -201,14 +210,14 @@ export default function RegisterScreen() {
                       value={password}
                       onChangeText={setPassword}
                     />
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       className="absolute right-3 z-10 p-1"
                       onPress={() => setShowPassword(!showPassword)}
                     >
-                      <MaterialIcons 
-                        name={showPassword ? "visibility" : "visibility-off"} 
-                        size={20} 
-                        color="#777587" 
+                      <MaterialIcons
+                        name={showPassword ? "visibility" : "visibility-off"}
+                        size={20}
+                        color="#777587"
                       />
                     </TouchableOpacity>
                   </View>
@@ -229,21 +238,21 @@ export default function RegisterScreen() {
                       value={confirmPassword}
                       onChangeText={setConfirmPassword}
                     />
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       className="absolute right-3 z-10 p-1"
                       onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
-                      <MaterialIcons 
-                        name={showConfirmPassword ? "visibility" : "visibility-off"} 
-                        size={20} 
-                        color="#777587" 
+                      <MaterialIcons
+                        name={showConfirmPassword ? "visibility" : "visibility-off"}
+                        size={20}
+                        color="#777587"
                       />
                     </TouchableOpacity>
                   </View>
                 </View>
 
                 {/* Submit Button */}
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={handleRegister}
                   disabled={isLoading}
                   className="w-full h-[52px] rounded-xl overflow-hidden shadow-md active:scale-[0.98] mt-2"

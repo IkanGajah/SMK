@@ -6,6 +6,7 @@ public class KamarDetailDTO {
     private String fasilitas;
     private Integer harga;
     private String status;
+    private String foto;
     
     private String namaPenyewa; 
     private String tempoBayar;
@@ -40,6 +41,12 @@ public class KamarDetailDTO {
     public void setStatus(String status) {
         this.status = status;
     }
+    public String getFoto() {
+        return foto;
+    }
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
     public String getNamaPenyewa() {
         return namaPenyewa;
     }
@@ -52,6 +59,4 @@ public class KamarDetailDTO {
     public void setTempoBayar(String tempoBayar) {
         this.tempoBayar = tempoBayar;
     }  
-
-    
 }

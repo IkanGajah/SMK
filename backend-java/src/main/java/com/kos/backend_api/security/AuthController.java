@@ -30,6 +30,9 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    private com.kos.backend_api.UserRepository userRepository;
+
     @PostMapping("/login")
     public WebResponse<AuthResponse> authenticateUser(@RequestBody AuthRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -62,5 +65,28 @@ public class AuthController {
 
         penyewaRepository.save(penyewa);
         return new WebResponse<>(201, "Registrasi Penyewa Berhasil", penyewa);
+    }
+
+    @PutMapping("/change-password")
+    public WebResponse<String> changePassword(@RequestParam String oldPassword, @RequestParam String newPassword) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new RuntimeException("Akses Ditolak: Harus login untuk mengubah password");
+        }
+
+        User userDetails = (User) authentication.getPrincipal();
+        
+        // Verifikasi password lama
+        if (!encoder.matches(oldPassword, userDetails.getPassword())) {
+            throw new RuntimeException("Password lama salah");
+        }
+
+        User dbUser = userRepository.findById(userDetails.getIdUser())
+            .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        dbUser.setPassword(encoder.encode(newPassword));
+        userRepository.save(dbUser);
+
+        return new WebResponse<>(200, "Password berhasil diubah", "OK");
     }
 }

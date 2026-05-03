@@ -18,7 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.lang.NonNull;
+
 @RestController
 @RequestMapping("/api/penyewa")
 public class PenyewaController {
@@ -46,8 +46,36 @@ public class PenyewaController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    public WebResponse<Penyewa> create(@RequestBody @NonNull Penyewa request) {
-        Penyewa baru = penyewaRepository.save(request);
+    public WebResponse<Penyewa> create(@RequestBody Penyewa request) {
+        Penyewa baru = penyewaRepository.save(java.util.Objects.requireNonNull(request));
         return new WebResponse<>(201, "Penyewa berhasil didaftarkan secara manual", baru);
+    }
+
+    @GetMapping("/profil")
+    @PreAuthorize("hasRole('PENYEWA')")
+    public WebResponse<Penyewa> getProfil() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        Penyewa penyewa = penyewaRepository.findById(user.getIdUser())
+            .orElseThrow(() -> new RuntimeException("Data penyewa tidak ditemukan"));
+        
+        return new WebResponse<>(200, "Profil berhasil diambil", penyewa);
+    }
+
+    @org.springframework.web.bind.annotation.PutMapping("/profil")
+    @PreAuthorize("hasRole('PENYEWA')")
+    public WebResponse<Penyewa> updateProfil(@RequestBody Penyewa request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        return penyewaRepository.findById(user.getIdUser()).map(penyewa -> {
+            if (request.getNama() != null) penyewa.setNama(request.getNama());
+            if (request.getNoTelepon() != null) penyewa.setNoTelepon(request.getNoTelepon());
+            if (request.getNoKtp() != null) penyewa.setNoKtp(request.getNoKtp());
+            
+            penyewaRepository.save(java.util.Objects.requireNonNull(penyewa));
+            return new WebResponse<>(200, "Profil berhasil diperbarui", penyewa);
+        }).orElseThrow(() -> new RuntimeException("Data penyewa tidak ditemukan"));
     }
 }

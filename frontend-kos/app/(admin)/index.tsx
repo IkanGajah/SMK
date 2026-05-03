@@ -5,13 +5,80 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Image,
-  Platform 
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { API_BASE_URL } from '@/constants/config';
+import { globalState } from '../_globalState';
+import { Kamar } from '@/types/types';
 
 export default function AdminDashboardScreen() {
+  const [loading, setLoading] = React.useState(true);
+  const [stats, setStats] = React.useState({
+    totalRooms: 0,
+    availableRooms: 0,
+    occupiedRooms: 0,
+    totalTenants: 0
+  });
+  const [recentActivity, setRecentActivity] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch Rooms
+      const roomsRes = await fetch(`${API_BASE_URL}/kamar`);
+      const roomsJson = await roomsRes.json();
+      
+      // Fetch Transactions
+      const transRes = await fetch(`${API_BASE_URL}/transaksi`, {
+        headers: { 'Authorization': `Bearer ${globalState.token}` }
+      });
+      const transJson = await transRes.json();
+
+      const rooms = roomsJson.data || [];
+      const transactions = transJson.data || [];
+
+      const available = rooms.filter((r: Kamar) => r.status?.toUpperCase() === 'TERSEDIA').length;
+      const occupied = rooms.filter((r: Kamar) => r.status?.toUpperCase() === 'TERISI').length;
+      
+      // Calculate unique tenants from transactions
+      const uniqueTenants = new Set(transactions.map((t: any) => t.penyewa?.idPenyewa)).size;
+
+      setStats({
+        totalRooms: rooms.length,
+        availableRooms: available,
+        occupiedRooms: occupied,
+        totalTenants: uniqueTenants || 0
+      });
+
+      setRecentActivity(transactions.slice(0, 4).map((t: any) => ({
+        id: t.idTransaksi,
+        title: `${t.penyewa?.nama || 'Someone'} paid rent for Kamar ${t.kamar?.nomorKamar || '?'}`,
+        time: 'Recently',
+        type: t.statusBayar === 'LUNAS' ? 'payment' : 'pending'
+      })));
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-surface">
+        <ActivityIndicator size="large" color="#4f46e5" />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-surface pt-4" edges={['top', 'left', 'right']}>
       
@@ -50,7 +117,7 @@ export default function AdminDashboardScreen() {
             <View className="flex-row justify-between items-start z-10">
               <View>
                 <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Total Rooms</Text>
-                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">124</Text>
+                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">{stats.totalRooms}</Text>
               </View>
               <View className="p-2 bg-[#e2dfff] rounded-lg">
                 <MaterialIcons name="apartment" size={20} color="#3525cd" />
@@ -63,7 +130,7 @@ export default function AdminDashboardScreen() {
             <View className="flex-row justify-between items-start z-10">
               <View>
                 <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Available</Text>
-                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">18</Text>
+                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">{stats.availableRooms}</Text>
               </View>
               <View className="p-2 bg-[#6df5e1] rounded-lg">
                 <MaterialIcons name="vpn-key" size={20} color="#006b5f" />
@@ -76,7 +143,7 @@ export default function AdminDashboardScreen() {
             <View className="flex-row justify-between items-start z-10">
               <View>
                 <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Occupied</Text>
-                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">106</Text>
+                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">{stats.occupiedRooms}</Text>
               </View>
               <View className="p-2 bg-[#dbd7ff] rounded-lg">
                 <MaterialIcons name="meeting-room" size={20} color="#3d37a9" />
@@ -89,7 +156,7 @@ export default function AdminDashboardScreen() {
             <View className="flex-row justify-between items-start z-10">
               <View>
                 <Text className="text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider mb-1">Tenants</Text>
-                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">215</Text>
+                <Text className="font-extrabold text-2xl text-on-surface tracking-tight">{stats.totalTenants}</Text>
               </View>
               <View className="p-2 bg-[#e2dfff] rounded-lg">
                 <MaterialIcons name="groups" size={20} color="#3525cd" />
@@ -122,57 +189,29 @@ export default function AdminDashboardScreen() {
           <Text className="font-bold text-[20px] text-on-surface">Recent Activity</Text>
           
           <View className="flex-col gap-0">
-            {/* Item 1 */}
-            <View className="flex-row gap-4 py-4 border-b border-outline-variant/15">
-              <View className="w-10 h-10 rounded-full bg-secondary-container items-center justify-center">
-                <MaterialIcons name="payments" size={18} color="#006f64" />
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity, index) => (
+                <View key={activity.id || index} className="flex-row gap-4 py-4 border-b border-outline-variant/15">
+                  <View className={`w-10 h-10 rounded-full items-center justify-center ${activity.type === 'payment' ? 'bg-secondary-container' : 'bg-tertiary-container'}`}>
+                    <MaterialIcons 
+                      name={activity.type === 'payment' ? 'payments' : 'pending-actions'} 
+                      size={18} 
+                      color={activity.type === 'payment' ? '#006f64' : '#3d37a9'} 
+                    />
+                  </View>
+                  <View className="flex-1 justify-center">
+                    <Text className="text-[14px] text-on-surface leading-snug">
+                      {activity.title}
+                    </Text>
+                    <Text className="text-[11px] text-on-surface-variant mt-0.5">{activity.time}</Text>
+                  </View>
+                </View>
+              ))
+            ) : (
+              <View className="py-10 items-center">
+                <Text className="text-on-surface-variant text-sm">No recent activity</Text>
               </View>
-              <View className="flex-1 justify-center">
-                <Text className="text-[14px] text-on-surface leading-snug">
-                  <Text className="font-bold">Sarah Jenkins</Text> paid rent for <Text className="font-bold">Apt 4B</Text>
-                </Text>
-                <Text className="text-[11px] text-on-surface-variant mt-0.5">2 hours ago</Text>
-              </View>
-            </View>
-
-            {/* Item 2 */}
-            <View className="flex-row gap-4 py-4 border-b border-outline-variant/15">
-              <View className="w-10 h-10 rounded-full bg-error-container items-center justify-center">
-                <MaterialIcons name="build" size={18} color="#93000a" />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text className="text-[14px] text-on-surface leading-snug">
-                  Maintenance request opened for <Text className="font-bold">Unit 12</Text>
-                </Text>
-                <Text className="text-[11px] text-on-surface-variant mt-0.5">5 hours ago</Text>
-              </View>
-            </View>
-
-            {/* Item 3 */}
-            <View className="flex-row gap-4 py-4 border-b border-outline-variant/15">
-              <View className="w-10 h-10 rounded-full bg-primary-container items-center justify-center">
-                <MaterialIcons name="person-add" size={18} color="#dad7ff" />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text className="text-[14px] text-on-surface leading-snug">
-                  New lease signed by <Text className="font-bold">Michael Chen</Text>
-                </Text>
-                <Text className="text-[11px] text-on-surface-variant mt-0.5">1 day ago</Text>
-              </View>
-            </View>
-
-            {/* Item 4 */}
-            <View className="flex-row gap-4 py-4">
-              <View className="w-10 h-10 rounded-full bg-surface-container-highest items-center justify-center">
-                <MaterialIcons name="mail" size={18} color="#191c1e" />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text className="text-[14px] text-on-surface leading-snug">
-                  Sent renewal notice to <Text className="font-bold">Apt 7A</Text>
-                </Text>
-                <Text className="text-[11px] text-on-surface-variant mt-0.5">2 days ago</Text>
-              </View>
-            </View>
+            )}
           </View>
         </View>
 

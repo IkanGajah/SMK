@@ -38,6 +38,12 @@ public class KamarController {
         return new WebResponse<>(200, "Berhasil mengambil data kamar", data);
     }
 
+    @GetMapping("/cabang/{cabangId}")
+    public WebResponse<List<Kamar>> getByCabang(@PathVariable("cabangId") int cabangId) {
+        List<Kamar> data = kamarRepository.findByCabangIdCabangAndStatusKetersediaanNot(cabangId, StatusKamar.NONAKTIF);
+        return new WebResponse<>(200, "Berhasil mengambil data kamar di cabang ini", data);
+    }
+
     @GetMapping("/{id}")
     public WebResponse<KamarDetailDTO> getById(@PathVariable("id") int id) {
         Kamar kamar = kamarRepository.findById(id).orElse(null);
@@ -51,6 +57,7 @@ public class KamarController {
         dto.setFasilitas(kamar.getFasilitas() != null ? kamar.getFasilitas().name() : null);
         dto.setHarga(kamar.getHargaSewa());
         dto.setStatus(kamar.getStatusKetersediaan() != null ? kamar.getStatusKetersediaan().name() : null);
+        dto.setFoto(kamar.getFoto());
 
         if (StatusKamar.PENUH.equals(kamar.getStatusKetersediaan())) {
             var transaksiOpt = transaksiSewaRepository.findFirstByKamarIdKamarOrderByTanggalTransaksiDesc(id);

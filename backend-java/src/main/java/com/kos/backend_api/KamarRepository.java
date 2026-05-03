@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface KamarRepository extends JpaRepository<Kamar, Integer> {
     List<Kamar> findByStatusKetersediaanNot(StatusKamar status);
+    List<Kamar> findByCabangIdCabangAndStatusKetersediaanNot(int idCabang, StatusKamar status);
 }
