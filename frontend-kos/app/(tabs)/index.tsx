@@ -401,7 +401,7 @@ export default function AuthenticatedCatalogScreen() {
             )}
 
             {/* Empty State */}
-            {kamar.length === 0 && (
+            {filteredKamar.length === 0 && (
               <View className="mt-16 px-6 items-center justify-center">
                 <MaterialIcons name="event-busy" size={64} color="#777587" />
                 <Text className="mt-4 text-lg font-bold text-on-surface text-center">Belum Ada Kamar</Text>

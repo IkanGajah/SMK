@@ -302,39 +302,50 @@ export default function GuestHomeScreen() {
               </View>
             )}
 
-            <View className="mt-8 px-4">
-              <Text className="font-bold text-[22px] text-on-surface mb-5 px-2">Jelajahi Kamar</Text>
-              <View className="flex-row flex-wrap justify-between">
-                {JELAJAHI.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    onPress={() => router.push(`/kamar/${item.id}?guest=true` as any)}
-                    className="w-[48%] bg-surface-container-lowest rounded-3xl overflow-hidden mb-6 shadow-sm border border-outline-variant/10"
-                  >
-                    <View className="h-40 relative">
-                      <Image source={{ uri: item.image }} className="w-full h-full" resizeMode="cover" />
-                      <View className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 items-center justify-center">
-                        <MaterialIcons name="favorite-border" size={18} color="#1b1b1f" />
-                      </View>
-                    </View>
-                    <View className="p-4">
-                      <Text className="font-bold text-base text-on-surface mb-1" numberOfLines={1}>{item.name}</Text>
-                      <View className="flex-row items-center gap-1 mb-3">
-                        <MaterialIcons name="location-on" size={14} color="#777587" />
-                        <Text className="text-xs text-outline flex-1" numberOfLines={1}>{item.location}</Text>
-                      </View>
-                      <View className="flex-row justify-between items-center">
-                        <Text className="text-primary font-black text-base">{item.price}</Text>
-                        <View className="flex-row items-center gap-1">
-                          <MaterialIcons name="star" size={14} color="#3525cd" />
-                          <Text className="text-xs font-bold text-on-surface">{item.rating}</Text>
+            {JELAJAHI.length > 0 && (
+              <View className="mt-8 px-4">
+                <Text className="font-bold text-[22px] text-on-surface mb-5 px-2">Jelajahi Kamar</Text>
+                <View className="flex-row flex-wrap justify-between">
+                  {JELAJAHI.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      onPress={() => router.push(`/kamar/${item.id}?guest=true` as any)}
+                      className="w-[48%] bg-surface-container-lowest rounded-3xl overflow-hidden mb-6 shadow-sm border border-outline-variant/10"
+                    >
+                      <View className="h-40 relative">
+                        <Image source={{ uri: item.image }} className="w-full h-full" resizeMode="cover" />
+                        <View className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 items-center justify-center">
+                          <MaterialIcons name="favorite-border" size={18} color="#1b1b1f" />
                         </View>
                       </View>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+                      <View className="p-4">
+                        <Text className="font-bold text-base text-on-surface mb-1" numberOfLines={1}>{item.name}</Text>
+                        <View className="flex-row items-center gap-1 mb-3">
+                          <MaterialIcons name="location-on" size={14} color="#777587" />
+                          <Text className="text-xs text-outline flex-1" numberOfLines={1}>{item.location}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center">
+                          <Text className="text-primary font-black text-base">{item.price}</Text>
+                          <View className="flex-row items-center gap-1">
+                            <MaterialIcons name="star" size={14} color="#3525cd" />
+                            <Text className="text-xs font-bold text-on-surface">{item.rating}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
+            )}
+
+            {/* Empty State */}
+            {filteredKamar.length === 0 && (
+              <View className="mt-16 px-6 items-center justify-center">
+                <MaterialIcons name="event-busy" size={64} color="#777587" />
+                <Text className="mt-4 text-lg font-bold text-on-surface text-center">Belum Ada Kamar</Text>
+                <Text className="mt-2 text-sm text-on-surface-variant text-center">Data kamar kosong.</Text>
+              </View>
+            )}
           </>
         )}
       </ScrollView>
