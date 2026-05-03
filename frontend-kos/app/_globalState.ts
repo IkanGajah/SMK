@@ -1,5 +1,7 @@
 export const globalState = {
   email: '',
   token: '',
-  role: ''
+  role: '',
+  namaLengkap: '',
+  foto: ''
 };
