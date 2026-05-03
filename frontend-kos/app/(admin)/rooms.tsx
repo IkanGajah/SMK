@@ -5,44 +5,58 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Image,
-  TextInput
+  TextInput,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { API_BASE_URL } from '@/constants/config';
+import { Kamar } from '@/types/types';
 
-// Data Dummy
-const ROOMS_DATA = [
-  {
-    id: 'r1',
-    name: 'Suite 402',
-    price: '$1,850',
-    details: '1 Bed • 1 Bath • 750 sqft',
-    status: 'Available',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMsiOEr6jpsbQ-59R08kDaVoD3YkJY71p-xL9DkOhw1rpnhQ0jITL192xH6rcKJDl00-XzNLEXJHzjvQFC3wjRB2uQe4JEGJ-yqcCYrvuOI4hSbT_vBa9ibBlp-m94dvEs2ewzIuQcgR1YIvc1-y5ZvSTmsKeyaMSAZBwOqnBiKQ_T5ZNWkA-HNtx-i9j26g85D8onp9qeG3Bbx21R-3x7CGQAJaqMpCUTy2qbTTB1T3UKuXDuWb77cD8vQ-FKwp3MAQPT_H5KLDA',
-    tenant: null
-  },
-  {
-    id: 'r2',
-    name: 'Apt 215',
-    price: '$2,100',
-    details: '2 Bed • 2 Bath • 1100 sqft',
-    status: 'Occupied',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAO3leihuQEcrEdVvfh37VmDG1nSPo_q_aQ6i-24T4U_N3dkZxjwAJNwsRsBHSPhqycOW6fKzPaPhk4BgFLoKsn_nZeOW8oEGvyGf_I9R3YWiOpnUCHyQO8v7RoYkMd6JnSFLSB8JMZgYaBKAAYLAlZcB2oy-hF1N0zboM1Qokanrn2Q3LlOE9iVC055DAlEwzKrxgpDw_1GUIMRUrzG7NxN06Gk_kikj8OLXOKg0a8jyfGSjuXeI0v0pxrkP78ua6060EcfldOjkk',
-    tenant: { initials: 'JD', name: 'John Doe' }
-  },
-  {
-    id: 'r3',
-    name: 'Studio 105',
-    price: '$1,450',
-    details: 'Studio • 1 Bath • 500 sqft',
-    status: 'Maintenance',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBUJADqgkC6u67qv7q3fNXAWmo1ReBGp6K4L-UyQqjVgIsIKL-W_GujeBD-U8agORDgbo_cjLRUmybkXzSRcqjFPcXt1Cza7vyEpnY4A3QGleQcfveH-Dt7gIp1sOalZMBN5Ns3LIYeSFvPYsJ1JF-NO_Rtn0LvOlv_FJvOIM4poIzlPFKgudqZmEVVp9XWg8juY5wxWt3R6EmHBnmbmTmdcdingI84glUpLHeC8RGk_wskyma6eRcC22h13fytBBM6gBUv9lxoA88',
-    tenant: null
-  }
+// Mock images for rooms
+const MOCK_ROOM_IMAGES = [
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuDMsiOEr6jpsbQ-59R08kDaVoD3YkJY71p-xL9DkOhw1rpnhQ0jITL192xH6rcKJDl00-XzNLEXJHzjvQFC3wjRB2uQe4JEGJ-yqcCYrvuOI4hSbT_vBa9ibBlp-m94dvEs2ewzIuQcgR1YIvc1-y5ZvSTmsKeyaMSAZBwOqnBiKQ_T5ZNWkA-HNtx-i9j26g85D8onp9qeG3Bbx21R-3x7CGQAJaqMpCUTy2qbTTB1T3UKuXDuWb77cD8vQ-FKwp3MAQPT_H5KLDA',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuAO3leihuQEcrEdVvfh37VmDG1nSPo_q_aQ6i-24T4U_N3dkZxjwAJNwsRsBHSPhqycOW6fKzPaPhk4BgFLoKsn_nZeOW8oEGvyGf_I9R3YWiOpnUCHyQO8v7RoYkMd6JnSFLSB8JMZgYaBKAAYLAlZcB2oy-hF1N0zboM1Qokanrn2Q3LlOE9iVC055DAlEwzKrxgpDw_1GUIMRUrzG7NxN06Gk_kikj8OLXOKg0a8jyfGSjuXeI0v0pxrkP78ua6060EcfldOjkk',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuBUJADqgkC6u67qv7q3fNXAWmo1ReBGp6K4L-UyQqjVgIsIKL-W_GujeBD-U8agORDgbo_cjLRUmybkXzSRcqjFPcXt1Cza7vyEpnY4A3QGleQcfveH-Dt7gIp1sOalZMBN5Ns3LIYeSFvPYsJ1JF-NO_Rtn0LvOlv_FJvOIM4poIzlPFKgudqZmEVVp9XWg8juY5wxWt3R6EmHBnmbmTmdcdingI84glUpLHeC8RGk_wskyma6eRcC22h13fytBBM6gBUv9lxoA88'
 ];
 
 export default function AdminRoomsScreen() {
+  const [rooms, setRooms] = React.useState<Kamar[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  React.useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/kamar`);
+      const json = await response.json();
+      if (json.data) {
+        setRooms(json.data);
+      }
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredRooms = rooms.filter(room => 
+    room.nomorKamar.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    room.fasilitas?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getStatusDisplay = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'TERSEDIA': return 'Available';
+      case 'TERISI': return 'Occupied';
+      case 'PERBAIKAN': return 'Maintenance';
+      default: return status || 'Available';
+    }
+  };
   return (
     <SafeAreaView className="flex-1 bg-surface pt-4" edges={['top', 'left', 'right']}>
       
@@ -81,6 +95,8 @@ export default function AdminRoomsScreen() {
               className="w-full pl-12 pr-4 h-[50px] bg-surface-container-highest rounded-xl text-on-surface"
               placeholder="Search by room number or tenant..."
               placeholderTextColor="#777587"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
           </View>
 
@@ -106,70 +122,85 @@ export default function AdminRoomsScreen() {
 
         {/* Room Grid */}
         <View className="flex-col gap-6">
-          {ROOMS_DATA.map((room) => (
-            <View key={room.id} className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm border border-outline-variant/10 flex-col relative">
-              
-              <View className="h-48 relative overflow-hidden bg-surface-container-highest">
-                <Image 
-                  source={{ uri: room.image }} 
-                  className={`w-full h-full ${room.status === 'Maintenance' ? 'opacity-80' : ''}`}
-                  resizeMode="cover"
-                />
-                {room.status === 'Maintenance' && (
-                  <View className="absolute inset-0 bg-surface/20" />
-                )}
-                
-                {/* Status Badge */}
-                <View className={`absolute top-4 right-4 px-3 py-1 rounded-full flex-row items-center gap-1 shadow-sm ${
-                  room.status === 'Available' ? 'bg-[#6df5e1]' : 
-                  room.status === 'Occupied' ? 'bg-[#eceef0]' : 'bg-[#ffdad6]'
-                }`}>
-                  <MaterialIcons 
-                    name={room.status === 'Available' ? 'check-circle' : room.status === 'Occupied' ? 'person' : 'build'} 
-                    size={14} 
-                    color={room.status === 'Available' ? '#006f64' : room.status === 'Occupied' ? '#464555' : '#93000a'} 
-                  />
-                  <Text className={`text-xs font-bold tracking-wide ${
-                    room.status === 'Available' ? 'text-[#006f64]' : 
-                    room.status === 'Occupied' ? 'text-[#464555]' : 'text-[#93000a]'
-                  }`}>
-                    {room.status}
-                  </Text>
-                </View>
-              </View>
-
-              <View className="p-5 flex-1 flex-col justify-between bg-surface-container-lowest relative z-10">
-                <View>
-                  <View className="flex-row justify-between items-start mb-2">
-                    <Text className="font-black text-[22px] text-on-surface">{room.name}</Text>
-                    <Text className="font-extrabold text-[20px] tracking-tight text-on-surface">
-                      {room.price}<Text className="text-sm font-normal text-on-surface-variant">/mo</Text>
-                    </Text>
-                  </View>
-                  <Text className="text-on-surface-variant text-sm mb-4">{room.details}</Text>
-                  
-                  {room.tenant && (
-                    <View className="bg-surface-container-low p-3 rounded-lg mb-4">
-                      <Text className="text-xs text-outline mb-1 font-semibold uppercase tracking-wider">Current Tenant</Text>
-                      <View className="flex-row items-center gap-2">
-                        <View className="w-6 h-6 rounded-full bg-[#4f46e5] items-center justify-center">
-                          <Text className="text-xs font-bold text-white">{room.tenant.initials}</Text>
-                        </View>
-                        <Text className="text-sm font-medium text-on-surface">{room.tenant.name}</Text>
-                      </View>
-                    </View>
-                  )}
-                </View>
-
-                <TouchableOpacity className="w-full bg-surface-container-highest active:bg-surface-container-high py-3 rounded-lg items-center mt-2">
-                  <Text className="text-on-surface font-semibold text-sm">
-                    {room.status === 'Available' ? 'Edit' : room.status === 'Occupied' ? 'Manage' : 'Update Status'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
+          {loading ? (
+            <View className="py-20 items-center">
+              <ActivityIndicator size="large" color="#4f46e5" />
+              <Text className="mt-4 text-on-surface-variant font-medium">Loading rooms...</Text>
             </View>
-          ))}
+          ) : filteredRooms.length > 0 ? (
+            filteredRooms.map((room, index) => {
+              const statusDisplay = getStatusDisplay(room.status || 'TERSEDIA');
+              return (
+                <View key={room.id} className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm border border-outline-variant/10 flex-col relative">
+                  
+                  <View className="h-48 relative overflow-hidden bg-surface-container-highest">
+                    <Image 
+                      source={{ uri: MOCK_ROOM_IMAGES[index % MOCK_ROOM_IMAGES.length] }} 
+                      className={`w-full h-full ${statusDisplay === 'Maintenance' ? 'opacity-80' : ''}`}
+                      resizeMode="cover"
+                    />
+                    {statusDisplay === 'Maintenance' && (
+                      <View className="absolute inset-0 bg-surface/20" />
+                    )}
+                    
+                    {/* Status Badge */}
+                    <View className={`absolute top-4 right-4 px-3 py-1 rounded-full flex-row items-center gap-1 shadow-sm ${
+                      statusDisplay === 'Available' ? 'bg-[#6df5e1]' : 
+                      statusDisplay === 'Occupied' ? 'bg-[#eceef0]' : 'bg-[#ffdad6]'
+                    }`}>
+                      <MaterialIcons 
+                        name={statusDisplay === 'Available' ? 'check-circle' : statusDisplay === 'Occupied' ? 'person' : 'build'} 
+                        size={14} 
+                        color={statusDisplay === 'Available' ? '#006f64' : statusDisplay === 'Occupied' ? '#464555' : '#93000a'} 
+                      />
+                      <Text className={`text-xs font-bold tracking-wide ${
+                        statusDisplay === 'Available' ? 'text-[#006f64]' : 
+                        statusDisplay === 'Occupied' ? 'text-[#464555]' : 'text-[#93000a]'
+                      }`}>
+                        {statusDisplay}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="p-5 flex-1 flex-col justify-between bg-surface-container-lowest relative z-10">
+                    <View>
+                      <View className="flex-row justify-between items-start mb-2">
+                        <Text className="font-black text-[22px] text-on-surface">Kamar {room.nomorKamar}</Text>
+                        <Text className="font-extrabold text-[20px] tracking-tight text-on-surface">
+                          Rp {((room.harga || room.hargaSewa || 0) / 1000).toFixed(0)}k<Text className="text-sm font-normal text-on-surface-variant">/mo</Text>
+                        </Text>
+                      </View>
+                      <Text className="text-on-surface-variant text-sm mb-4">{room.fasilitas || 'Standar Room'}</Text>
+                      
+                      {statusDisplay === 'Occupied' && (
+                        <View className="bg-surface-container-low p-3 rounded-lg mb-4">
+                          <Text className="text-xs text-outline mb-1 font-semibold uppercase tracking-wider">Current Tenant</Text>
+                          <View className="flex-row items-center gap-2">
+                            <View className="w-6 h-6 rounded-full bg-[#4f46e5] items-center justify-center">
+                              <Text className="text-xs font-bold text-white">?</Text>
+                            </View>
+                            <Text className="text-sm font-medium text-on-surface">Active Resident</Text>
+                          </View>
+                        </View>
+                      )}
+                    </View>
+
+                    <TouchableOpacity className="w-full bg-surface-container-highest active:bg-surface-container-high py-3 rounded-lg items-center mt-2">
+                      <Text className="text-on-surface font-semibold text-sm">
+                        {statusDisplay === 'Available' ? 'Edit' : statusDisplay === 'Occupied' ? 'Manage' : 'Update Status'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                </View>
+              );
+            })
+          ) : (
+            <View className="py-20 items-center">
+              <MaterialIcons name="search-off" size={48} color="#777587" />
+              <Text className="mt-4 text-on-surface-variant font-medium">No rooms found</Text>
+            </View>
+          )}
         </View>
 
       </ScrollView>

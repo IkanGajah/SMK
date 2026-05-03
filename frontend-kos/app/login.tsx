@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Text, 
-  View, 
-  TextInput, 
-  TouchableOpacity, 
-  KeyboardAvoidingView, 
+import {
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   ActivityIndicator,
@@ -38,16 +38,18 @@ export default function LoginScreen() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      
+
       const responseData = await response.json();
-      
-        if (response.ok && responseData.data) {
+
+      if (response.ok && responseData.data) {
         const role = responseData.data.role;
-        const globalState = require('./globalState').globalState;
+        const globalState = require('./_globalState').globalState;
         globalState.email = email;
         globalState.token = responseData.data.token || '';
         globalState.role = role;
-        
+        globalState.namaLengkap = responseData.data.nama || '';
+        globalState.foto = responseData.data.foto || '';
+
         if (role === 'ROLE_OWNER') {
           router.replace('/(owner)' as any);
         } else if (role === 'ROLE_ADMIN') {
@@ -58,7 +60,7 @@ export default function LoginScreen() {
       } else {
         Alert.alert("Login Gagal", responseData.message || "Kredensial tidak valid");
       }
-      
+
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Gagal menghubungi server");
@@ -75,15 +77,15 @@ export default function LoginScreen() {
       className="flex-1"
     >
       <SafeAreaView className="flex-1">
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           className="flex-1"
         >
-          <ScrollView 
+          <ScrollView
             contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 20 }}
             showsVerticalScrollIndicator={false}
           >
-            
+
             {/* Logo Header */}
             <View className="items-center mb-10">
               <View className="flex-row items-center gap-2">
@@ -94,7 +96,7 @@ export default function LoginScreen() {
             </View>
 
             {/* Glassmorphism Login Card */}
-            <View 
+            <View
               className="rounded-2xl p-8 border border-white/20 shadow-lg"
               style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)' }}
             >
@@ -138,14 +140,14 @@ export default function LoginScreen() {
                       value={password}
                       onChangeText={setPassword}
                     />
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       className="absolute right-3 z-10 p-1"
                       onPress={() => setShowPassword(!showPassword)}
                     >
-                      <MaterialIcons 
-                        name={showPassword ? "visibility" : "visibility-off"} 
-                        size={20} 
-                        color="#777587" 
+                      <MaterialIcons
+                        name={showPassword ? "visibility" : "visibility-off"}
+                        size={20}
+                        color="#777587"
                       />
                     </TouchableOpacity>
                   </View>
@@ -157,7 +159,7 @@ export default function LoginScreen() {
                 </View>
 
                 {/* Submit Button */}
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={handleLogin}
                   disabled={isLoading}
                   className="w-full h-[52px] rounded-xl overflow-hidden shadow-sm active:scale-95"
@@ -189,7 +191,7 @@ export default function LoginScreen() {
 
             {/* Back Link */}
             <View className="mt-8 flex-row justify-center">
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="flex-row items-center gap-2"
                 onPress={() => router.back()}
               >

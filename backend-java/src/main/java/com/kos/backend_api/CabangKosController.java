@@ -16,7 +16,6 @@ public class CabangKosController {
     private CabangKosRepository cabangKosRepository;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN', 'PENYEWA')")
     public WebResponse<List<CabangKos>> getAll() {
         List<CabangKos> data = cabangKosRepository.findByStatusNot("Nonaktif");
         return new WebResponse<>(200, "Daftar cabang kos berhasil diambil", data);
